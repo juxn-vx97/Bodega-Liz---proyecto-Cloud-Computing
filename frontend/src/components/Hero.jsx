@@ -1,16 +1,32 @@
+import { Link } from 'react-router-dom'
+
 function Hero() {
+
   return (
+
     <section className="hero">
 
-      <h1>Bienvenido a Bodega Liz</h1>
+      <h1>Bodega Liz</h1>
+
+      <h2>
+        Todo lo que necesitas cerca de ti
+      </h2>
 
       <p>
-        Plataforma web moderna para ventas digitales y gestión inteligente de productos.
+        Encuentra bebidas, snacks y productos
+        de calidad con atención rápida y precios accesibles.
       </p>
 
-      <button>Ver Productos</button>
+      <Link to="/productos">
+
+        <button>
+          Ver Productos
+        </button>
+
+      </Link>
 
     </section>
+
   );
 }
 
