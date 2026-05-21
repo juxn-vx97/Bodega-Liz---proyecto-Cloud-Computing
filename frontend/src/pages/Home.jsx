@@ -1,4 +1,7 @@
 import Hero from '../components/Hero'
+import Footer from '../components/Footer'
+import Categorias from '../components/Categorias'
+import Promociones from '../components/Promociones'
 import ProductCard from '../components/ProductCard'
 
 import cocaColaImg from '../assets/cocacola.jpg'
@@ -36,6 +39,10 @@ function Home() {
 
       <Hero />
 
+      <Categorias />
+
+      <Promociones />
+
       <section className="products">
 
         {
@@ -50,6 +57,8 @@ function Home() {
         }
 
       </section>
+      
+      <Footer />
 
     </div>
   );
