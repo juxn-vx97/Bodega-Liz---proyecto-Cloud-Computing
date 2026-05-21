@@ -7,14 +7,141 @@ body {
 /* NAVBAR */
 
 .navbar {
-  background-color: #1e3a8a;
+
+  background-color: #14532d;
+
   color: white;
 
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
 
   padding: 20px 50px;
+
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 1000;
+
+}
+
+
+
+.logo-section {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+}
+
+
+
+.logo-circle {
+
+  background-color: white;
+
+  color: #14532d;
+
+  width: 60px;
+
+  height: 60px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  font-size: 30px;
+
+}
+
+
+
+.logo-section h2 {
+
+  margin: 0;
+
+  font-size: 28px;
+
+}
+
+
+
+.logo-section p {
+
+  margin: 0;
+
+  font-size: 14px;
+
+  color: #d1fae5;
+
+}
+
+
+
+.menu {
+
+  display: flex;
+
+  list-style: none;
+
+  gap: 30px;
+
+}
+
+
+
+.menu a {
+
+  text-decoration: none;
+
+  color: white;
+
+  font-size: 18px;
+
+  font-weight: bold;
+
+  transition: 0.3s;
+
+}
+
+
+
+.menu a:hover {
+
+  color: #bbf7d0;
+
+}
+
+
+
+.cart {
+
+  background-color: white;
+
+  color: #14532d;
+
+  padding: 10px 20px;
+
+  border-radius: 10px;
+
+  text-decoration: none;
+
+  font-weight: bold;
+
+  font-size: 18px;
+
 }
 
 .menu {
