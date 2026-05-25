@@ -1,29 +1,47 @@
 import { Link } from 'react-router-dom'
 
+import heroImg from '../assets/hero.jpg'
+
 function Hero() {
 
   return (
 
-    <section className="hero">
+    <section
+      className="hero"
+      style={{
 
-      <h1>Bodega Liz</h1>
+        backgroundImage: `
+          linear-gradient(
+            rgba(0,0,0,0.55),
+            rgba(0,0,0,0.55)
+          ),
+          url(${heroImg})
+        `
+      }}
+    >
 
-      <h2>
-        Todo lo que necesitas cerca de ti
-      </h2>
+      <div className="hero-content">
 
-      <p>
-        Encuentra bebidas, snacks y productos
-        de calidad con atención rápida y precios accesibles.
-      </p>
+        <h1>Bodega Liz</h1>
 
-      <Link to="/productos">
+        <h2>
+          Todo lo que necesitas cerca de ti
+        </h2>
 
-        <button>
-          Ver Productos
-        </button>
+        <p>
+          Encuentra bebidas, snacks y productos
+          de calidad con atención rápida y precios accesibles.
+        </p>
 
-      </Link>
+        <Link to="/productos">
+
+          <button>
+            Ver Productos
+          </button>
+
+        </Link>
+
+      </div>
 
     </section>
 

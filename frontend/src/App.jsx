@@ -24,8 +24,15 @@ function App() {
 
       <Routes>
 
-        <Route path="/" element={<Home />} />
-
+<Route
+  path="/"
+  element={
+    <Home
+      carrito={carrito}
+      setCarrito={setCarrito}
+    />
+  }
+/>
         <Route
           path="/productos"
           element={

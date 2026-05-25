@@ -1,10 +1,38 @@
 import { Link } from 'react-router-dom'
 
 function Navbar(props) {
+
   return (
+
     <nav className="navbar">
 
-      <h2>Bodega Liz</h2>
+      <div className="logo-section">
+
+        <div className="logo-circle">
+          🛒
+        </div>
+
+        <div>
+
+          <h2
+             style={{
+             color: 'white',
+             fontWeight: '800',
+             letterSpacing: '1px'
+         }}
+            >
+              Bodega Liz
+          </h2>
+
+          <p>
+            Todo lo que necesitas cerca de ti
+          </p>
+
+        </div>
+
+      </div>
+
+
 
       <ul className="menu">
 
@@ -27,13 +55,15 @@ function Navbar(props) {
       </ul>
 
 
+
       <Link to="/carrito" className="cart">
 
-  🛒 {props.carrito.length}
+        🛒 {props.carrito.length}
 
-</Link>
+      </Link>
 
     </nav>
+
   );
 }
 

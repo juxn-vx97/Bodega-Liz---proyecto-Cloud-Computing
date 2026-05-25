@@ -1,38 +1,52 @@
+import { useNavigate } from 'react-router-dom'
+
 function Categorias() {
+
+  const navigate = useNavigate()
 
   const categorias = [
 
     {
-      nombre: 'Bebidas',
-      icono: '🥤'
+      icono: '🥤',
+      nombre: 'Bebidas'
     },
 
     {
-      nombre: 'Snacks',
-      icono: '🍟'
+      icono: '🍟',
+      nombre: 'Snacks'
     },
 
     {
-      nombre: 'Galletas',
-      icono: '🍪'
+      icono: '🍪',
+      nombre: 'Galletas'
     },
 
     {
-      nombre: 'Limpieza',
-      icono: '🧼'
+      icono: '🥛',
+      nombre: 'Primera necesidad'
     },
 
     {
-      nombre: 'Abarrotes',
-      icono: '🛒'
-    },
-
-    {
-      nombre: 'Delivery',
-      icono: '🚚'
+      icono: '🍫',
+      nombre: 'Dulces'
     }
 
   ]
+
+
+  function irCategoria(nombreCategoria) {
+
+    navigate('/productos', {
+
+      state: {
+
+        categoria: nombreCategoria
+
+      }
+
+    })
+
+  }
 
 
   return (
@@ -42,15 +56,22 @@ function Categorias() {
       {
         categorias.map((categoria, index) => (
 
-          <div className="category-card" key={index}>
+          <div
+            className="category-card"
+            key={index}
 
-            <div className="category-icon">
+            onClick={() =>
+              irCategoria(categoria.nombre)
+            }
+          >
 
+            <span>
               {categoria.icono}
+            </span>
 
-            </div>
-
-            <h3>{categoria.nombre}</h3>
+            <h3>
+              {categoria.nombre}
+            </h3>
 
           </div>
 
