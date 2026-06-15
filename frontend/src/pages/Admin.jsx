@@ -50,56 +50,127 @@ function Admin() {
 
   const [nuevoEstado, setNuevoEstado] = useState('Disponible')
 
+  const [productoEditando, setProductoEditando] = useState(null)
+
+const [editarNombre, setEditarNombre] = useState('')
+
+const [editarPrecio, setEditarPrecio] = useState('')
+
+const [editarStock, setEditarStock] = useState('')
+
+const [editarEstado, setEditarEstado] = useState('')
+
+const [busqueda, setBusqueda] = useState('')
+
   const eliminarProducto = (index) => {
 
-    const nuevosProductos = productos.filter(
-      (_, i) => i !== index
-    )
+  const nuevosProductos = productos.filter(
+    (_, i) => i !== index
+  )
 
-    setProductos(nuevosProductos)
+  setProductos(nuevosProductos)
 
-  }
+}
 
-  const agregarProducto = () => {
+const seleccionarProducto = (producto, index) => {
 
-    if (
-      nuevoNombre === '' ||
-      nuevoPrecio === '' ||
-      nuevoStock === ''
-    ) {
+  setProductoEditando(index)
 
-      alert('Complete todos los campos')
+  setEditarNombre(producto.nombre)
 
-      return
+  setEditarPrecio(producto.precio)
 
-    }
+  setEditarStock(producto.stock)
 
-    const productoNuevo = {
+  setEditarEstado(producto.estado)
 
-      nombre: nuevoNombre,
+}
 
-      precio: Number(nuevoPrecio),
+const agregarProducto = () => {
 
-      stock: Number(nuevoStock),
+  if (
+    nuevoNombre === '' ||
+    nuevoPrecio === '' ||
+    nuevoStock === ''
+  ) {
 
-      estado: nuevoEstado
+    alert('Complete todos los campos')
 
-    }
-
-    setProductos([
-      productoNuevo,
-      ...productos
-    ])
-
-    setNuevoNombre('')
-
-    setNuevoPrecio('')
-
-    setNuevoStock('')
-
-    setNuevoEstado('Disponible')
+    return
 
   }
+
+  const productoNuevo = {
+
+  nombre: nuevoNombre,
+
+  precio: Number(nuevoPrecio),
+
+  stock: Number(nuevoStock),
+
+  estado: Number(nuevoStock) > 0
+    ? 'Disponible'
+    : 'Agotado'
+
+}
+
+  setProductos([
+    productoNuevo,
+    ...productos
+  ])
+
+  setNuevoNombre('')
+
+  setNuevoPrecio('')
+
+  setNuevoStock('')
+
+  setNuevoEstado('Disponible')
+
+}
+
+const guardarCambios = () => {
+
+  const nuevosProductos = [...productos]
+
+  nuevosProductos[productoEditando] = {
+
+  nombre: editarNombre,
+
+  precio: Number(editarPrecio),
+
+  stock: Number(editarStock),
+
+  estado: Number(editarStock) > 0
+    ? 'Disponible'
+    : 'Agotado'
+
+}
+
+  setProductos(nuevosProductos)
+
+  setProductoEditando(null)
+
+}
+
+const productosFiltrados = productos.filter(
+  (producto) =>
+    producto.nombre
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
+)
+
+const productosDisponibles = productos.filter(
+  producto => producto.stock > 0
+).length
+
+const productosAgotados = productos.filter(
+  producto => producto.stock === 0
+).length
+
+const productosStockBajo = productos.filter(
+  producto => producto.stock > 0 && producto.stock <= 5
+).length
 
   return (
 
@@ -133,15 +204,39 @@ function Admin() {
           Gestión general de la tienda.
         </p>
 
-        <div className="admin-cards">
+       <div className="admin-cards">
 
-          <div className="admin-card">
+  <div className="admin-card">
 
-            <h2>📦 Productos</h2>
+    <h2>📦 Productos</h2>
 
-            <h3>{productos.length}</h3>
+    <h3>{productos.length}</h3>
 
-          </div>
+  </div>
+
+  <div className="admin-card">
+
+    <h2>🟢 Disponibles</h2>
+
+    <h3>{productosDisponibles}</h3>
+
+  </div>
+
+  <div className="admin-card">
+
+    <h2>🔴 Agotados</h2>
+
+    <h3>{productosAgotados}</h3>
+
+  </div>
+
+  <div className="admin-card">
+
+    <h2>🟡 Stock Bajo</h2>
+
+    <h3>{productosStockBajo}</h3>
+
+  </div>
 
           <div className="admin-card">
 
@@ -174,6 +269,82 @@ function Admin() {
           Gestión de Inventario
 
         </h2>
+
+        <div className="search-container">
+
+  <input
+    type="text"
+    placeholder="🔍 Buscar producto..."
+    value={busqueda}
+    onChange={(e) =>
+      setBusqueda(e.target.value)
+    }
+    className="search-input"
+  />
+
+</div>
+        
+        {
+  productoEditando !== null && (
+
+    <div className="product-form">
+
+      <h3>Editar Producto</h3>
+
+      <input
+        type="text"
+        value={editarNombre}
+        onChange={(e) =>
+          setEditarNombre(e.target.value)
+        }
+      />
+
+      <input
+        type="number"
+        value={editarPrecio}
+        onChange={(e) =>
+          setEditarPrecio(e.target.value)
+        }
+      />
+
+      <input
+        type="number"
+        value={editarStock}
+        onChange={(e) =>
+          setEditarStock(e.target.value)
+        }
+      />
+
+      <select
+        value={editarEstado}
+        onChange={(e) =>
+          setEditarEstado(e.target.value)
+        }
+      >
+
+        <option>
+          Disponible
+        </option>
+
+        <option>
+          Agotado
+        </option>
+
+      </select>
+
+      <button
+        className="add-btn"
+        onClick={guardarCambios}
+      >
+
+        Guardar Cambios
+
+      </button>
+
+    </div>
+
+  )
+}   
 
         <div className="product-form">
 
@@ -255,8 +426,7 @@ function Admin() {
           <tbody>
 
             {
-              productos.map((producto, index) => (
-
+              productosFiltrados.map((producto, index) => (
                 <tr key={index}>
 
                   <td>{producto.nombre}</td>
@@ -265,15 +435,27 @@ function Admin() {
 
                   <td>{producto.stock}</td>
 
-                  <td>{producto.estado}</td>
-
                   <td>
 
-                    <button className="edit-btn">
+                    {producto.stock === 0
+                       ? '🔴 Agotado'
+                   : producto.stock <= 5
+                       ? '🟡 Stock Bajo'
+                       : '🟢 Disponible'}
 
-                      Editar
+                  </td>
+                  <td>
 
-                    </button>
+                    <button
+  className="edit-btn"
+  onClick={() =>
+    seleccionarProducto(producto, index)
+  }
+>
+
+  Editar
+
+</button>
 
                     <button
                       className="delete-btn"
