@@ -1431,3 +1431,101 @@ body {
   font-size: 16px;
 
 }
+
+/* LOGIN ADMINISTRADOR */
+
+.login-page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#f4f6f9;
+}
+
+.login-admin{
+  width:420px;
+  background:white;
+  padding:40px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  text-align:center;
+}
+
+.login-admin h1{
+  font-size:42px;
+  color:#14532d;
+  margin-bottom:15px;
+  font-weight:700;
+  line-height:1.2;
+}
+
+.login-admin p{
+  color:#666;
+  margin-bottom:25px;
+}
+
+.login-admin input{
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  font-size:16px;
+}
+
+.login-admin button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#16a34a;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.login-admin button:hover{
+  background:#15803d;
+}
+
+.login-icon{
+  font-size:60px;
+  margin-bottom:15px;
+}
+
+/* CABECERA ADMIN */
+
+.admin-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.admin-user{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.admin-user span{
+  font-weight:bold;
+  color:#333;
+}
+
+.logout-btn{
+  border:none;
+  background:#dc2626;
+  color:white;
+  padding:10px 15px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+.logout-btn:hover{
+  background:#b91c1c;
+}

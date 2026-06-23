@@ -10,6 +10,7 @@ import Contacto from './pages/Contacto'
 import Carrito from './pages/Carrito'
 import Admin from './pages/Admin'
 
+
 function App() {
 
   const [carrito, setCarrito] = useState([])
@@ -44,6 +45,7 @@ function App() {
         <Route path="/servicios" element={<Servicios />} />
 
         <Route path="/contacto" element={<Contacto />} />
+        
 
         <Route
           path="/administrador"

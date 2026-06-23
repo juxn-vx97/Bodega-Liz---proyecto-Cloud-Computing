@@ -1,46 +1,71 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function Admin() {
 
-  const [productos, setProductos] = useState([
+const [productos, setProductos] = useState(() => {
 
-    { nombre: 'Coca Cola', precio: 4.50, stock: 20, estado: 'Disponible' },
+  const productosGuardados =
+    localStorage.getItem('productos')
 
-    { nombre: 'Papas Lays', precio: 3.00, stock: 15, estado: 'Disponible' },
+  return productosGuardados
+    ? JSON.parse(productosGuardados)
+    : [
 
-    { nombre: 'Galletas Oreo', precio: 2.50, stock: 10, estado: 'Disponible' },
+      { nombre: 'Coca Cola', precio: 4.50, stock: 20, estado: 'Disponible' },
 
-    { nombre: 'Agua Cielo', precio: 2.00, stock: 25, estado: 'Disponible' },
+      { nombre: 'Papas Lays', precio: 3.00, stock: 15, estado: 'Disponible' },
 
-    { nombre: 'Arroz Costeño', precio: 6.50, stock: 12, estado: 'Disponible' },
+      { nombre: 'Galletas Oreo', precio: 2.50, stock: 10, estado: 'Disponible' },
 
-    { nombre: 'Azúcar Rubia', precio: 4.20, stock: 8, estado: 'Disponible' },
+      { nombre: 'Agua Cielo', precio: 2.00, stock: 25, estado: 'Disponible' },
 
-    { nombre: 'Casino', precio: 2.00, stock: 20, estado: 'Disponible' },
+      { nombre: 'Arroz Costeño', precio: 6.50, stock: 12, estado: 'Disponible' },
 
-    { nombre: 'Chizitos', precio: 3.50, stock: 18, estado: 'Disponible' },
+      { nombre: 'Azúcar Rubia', precio: 4.20, stock: 8, estado: 'Disponible' },
 
-    { nombre: 'Doritos', precio: 5.00, stock: 0, estado: 'Agotado' },
+      { nombre: 'Casino', precio: 2.00, stock: 20, estado: 'Disponible' },
 
-    { nombre: 'Leche Gloria', precio: 5.50, stock: 14, estado: 'Disponible' },
+      { nombre: 'Chizitos', precio: 3.50, stock: 18, estado: 'Disponible' },
 
-    { nombre: 'Pringles', precio: 9.00, stock: 5, estado: 'Disponible' },
+      { nombre: 'Doritos', precio: 5.00, stock: 0, estado: 'Agotado' },
 
-    { nombre: 'Red Bull', precio: 8.50, stock: 0, estado: 'Agotado' },
+      { nombre: 'Leche Gloria', precio: 5.50, stock: 14, estado: 'Disponible' },
 
-    { nombre: 'Ritz', precio: 3.50, stock: 9, estado: 'Disponible' },
+      { nombre: 'Pringles', precio: 9.00, stock: 5, estado: 'Disponible' },
 
-    { nombre: 'Snickers', precio: 4.00, stock: 16, estado: 'Disponible' },
+      { nombre: 'Red Bull', precio: 8.50, stock: 0, estado: 'Agotado' },
 
-    { nombre: 'Sprite', precio: 4.50, stock: 11, estado: 'Disponible' },
+      { nombre: 'Ritz', precio: 3.50, stock: 9, estado: 'Disponible' },
 
-    { nombre: 'Sublime', precio: 2.50, stock: 22, estado: 'Disponible' },
+      { nombre: 'Snickers', precio: 4.00, stock: 16, estado: 'Disponible' },
 
-    { nombre: 'Tentación', precio: 3.00, stock: 13, estado: 'Disponible' },
+      { nombre: 'Sprite', precio: 4.50, stock: 11, estado: 'Disponible' },
 
-    { nombre: 'Trident', precio: 2.00, stock: 30, estado: 'Disponible' }
+      { nombre: 'Sublime', precio: 2.50, stock: 22, estado: 'Disponible' },
 
-  ])
+      { nombre: 'Tentación', precio: 3.00, stock: 13, estado: 'Disponible' },
+
+      { nombre: 'Trident', precio: 2.00, stock: 30, estado: 'Disponible' }
+      
+    ]
+})
+
+        useEffect(() => {
+
+            localStorage.setItem(
+                'productos',
+               JSON.stringify(productos)
+           )
+
+             }, [productos])
+
+  const [adminLogueado, setAdminLogueado] = useState(
+  localStorage.getItem('adminLogueado') === 'true'
+  )
+
+  const [usuario, setUsuario] = useState('')
+
+  const [password, setPassword] = useState('')
 
   const [nuevoNombre, setNuevoNombre] = useState('')
 
@@ -72,9 +97,9 @@ const [busqueda, setBusqueda] = useState('')
 
 }
 
-const seleccionarProducto = (producto, index) => {
+const seleccionarProducto = (producto) => {
 
-  setProductoEditando(index)
+  setProductoEditando(producto.indexOriginal)
 
   setEditarNombre(producto.nombre)
 
@@ -158,7 +183,10 @@ const productosFiltrados = productos.filter(
     producto.nombre
       .toLowerCase()
       .includes(busqueda.toLowerCase())
-)
+).map((producto) => ({
+  ...producto,
+  indexOriginal: productos.indexOf(producto)
+}))
 
 const productosDisponibles = productos.filter(
   producto => producto.stock > 0
@@ -171,6 +199,100 @@ const productosAgotados = productos.filter(
 const productosStockBajo = productos.filter(
   producto => producto.stock > 0 && producto.stock <= 5
 ).length
+
+const iniciarSesion = () => {
+
+  if (
+    usuario === 'admin' &&
+    password === '123456'
+  ) {
+
+    localStorage.setItem(
+      'adminLogueado',
+      'true'
+    )
+
+    localStorage.setItem(
+      'ultimoUsuario',
+      usuario
+    )
+
+    setAdminLogueado(true)
+
+  } else {
+
+    alert(
+      'Usuario o contraseña incorrectos'
+    )
+
+  }
+
+}
+
+const cerrarSesion = () => {
+
+  localStorage.removeItem(
+    'adminLogueado'
+  )
+
+  setAdminLogueado(false)
+
+  setPassword('')
+
+}
+
+if (!adminLogueado) {
+
+  return (
+
+
+   <div className="login-page">
+   <div className="login-admin">
+
+   <div className="login-icon">
+    🔐
+   </div>    
+
+      <h1>
+        Acceso Administrativo
+      </h1>
+
+      <p>
+        Ingrese sus credenciales para acceder al sistema.
+      </p>
+
+      <input
+        type="text"
+        placeholder="Usuario"
+        value={usuario}
+        onChange={(e) =>
+          setUsuario(e.target.value)
+        }
+      />
+
+      <input
+        type="password"
+        placeholder="Contraseña"
+        value={password}
+        onChange={(e) =>
+          setPassword(e.target.value)
+        }
+      />
+
+      <button
+        className="add-btn"
+        onClick={iniciarSesion}
+      >
+        Ingresar
+      </button>
+
+    </div>
+    </div>
+
+
+  )
+
+}
 
   return (
 
@@ -198,11 +320,34 @@ const productosStockBajo = productos.filter(
 
       <main className="admin-content">
 
-        <h1>Panel de Administración</h1>
+       <div className="admin-header">
 
-        <p>
-          Gestión general de la tienda.
-        </p>
+  <div>
+
+    <h1>Panel de Administración</h1>
+
+    <p>
+      Gestión general de la tienda.
+    </p>
+
+  </div>
+
+  <div className="admin-user">
+
+    <span>
+      👤 Administrador
+    </span>
+
+    <button
+      className="logout-btn"
+      onClick={cerrarSesion}
+    >
+      🚪 Cerrar Sesión
+    </button>
+
+  </div>
+
+</div>
 
        <div className="admin-cards">
 
@@ -449,8 +594,8 @@ const productosStockBajo = productos.filter(
                     <button
   className="edit-btn"
   onClick={() =>
-    seleccionarProducto(producto, index)
-  }
+  seleccionarProducto(producto)
+}
 >
 
   Editar
@@ -483,6 +628,7 @@ const productosStockBajo = productos.filter(
 
   );
 
-}
 
+}
 export default Admin;
+
