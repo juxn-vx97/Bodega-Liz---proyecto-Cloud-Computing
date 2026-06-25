@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
 
+import db from '../firebase/firestore'
+
+import {
+  collection,
+  addDoc
+} from 'firebase/firestore'
+
 function Admin() {
 
 const [productos, setProductos] = useState(() => {

@@ -1,6 +1,6 @@
 import './App.css'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -9,11 +9,30 @@ import Servicios from './pages/Servicios'
 import Contacto from './pages/Contacto'
 import Carrito from './pages/Carrito'
 import Admin from './pages/Admin'
+import FinalizarCompra from './pages/FinalizarCompra'
 
 
 function App() {
 
-  const [carrito, setCarrito] = useState([])
+const [carrito, setCarrito] = useState(() => {
+
+  const carritoGuardado =
+    localStorage.getItem('carrito')
+
+  return carritoGuardado
+    ? JSON.parse(carritoGuardado)
+    : []
+
+})
+
+useEffect(() => {
+
+  localStorage.setItem(
+    'carrito',
+    JSON.stringify(carrito)
+  )
+
+}, [carrito])
 
   return (
 
@@ -55,13 +74,26 @@ function App() {
         <Route
           path="/carrito"
           element={
+
+            
             
   <Carrito
     carrito={carrito}
     setCarrito={setCarrito}
   />
+
 }
         />
+
+  <Route
+  path="/finalizar-compra"
+  element={
+    <FinalizarCompra
+      carrito={carrito}
+      setCarrito={setCarrito}
+    />
+  }
+/>
 
       </Routes>
 

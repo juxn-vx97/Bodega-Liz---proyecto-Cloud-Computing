@@ -170,6 +170,21 @@ function Carrito(props) {
           Total: S/ {total.toFixed(2)}
         </h2>
 
+        <button
+
+        className="checkout-btn"
+
+        onClick={() =>
+        window.location.href =
+        '/finalizar-compra'
+        }
+
+>
+
+Finalizar Compra
+
+</button>
+
       </section>
 
     </div>

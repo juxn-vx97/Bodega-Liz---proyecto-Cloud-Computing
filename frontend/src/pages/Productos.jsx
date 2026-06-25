@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
+
 import ProductCard from '../components/ProductCard'
 import cocaColaImg from '../assets/cocacola.jpg'
 import laysImg from '../assets/lays.jpg'
@@ -26,6 +28,8 @@ function Productos(props) {
 
 const categoriaSeleccionada =
   location.state?.categoria
+
+const [busqueda, setBusqueda] = useState('')
 
   const productos = [
 
@@ -177,18 +181,21 @@ const categoriaSeleccionada =
   ]
 
 
-  const productosFiltrados =
-  categoriaSeleccionada
+  const productosFiltrados = productos.filter((producto) => {
 
-    ? productos.filter(
+  const coincideCategoria =
+    categoriaSeleccionada
+      ? producto.categoria === categoriaSeleccionada
+      : true
 
-        (producto) =>
-          producto.categoria ===
-          categoriaSeleccionada
-      )
+  const coincideBusqueda =
+    producto.nombre
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
 
-    : productos
+  return coincideCategoria && coincideBusqueda
 
+})
 
   return (
 
@@ -212,22 +219,58 @@ const categoriaSeleccionada =
       </section>
 
 
+      <div className="search-container">
+
+  <input
+
+    type="text"
+
+    placeholder="🔍 Buscar producto..."
+
+    className="search-input"
+
+    value={busqueda}
+
+    onChange={(e) =>
+      setBusqueda(e.target.value)
+    }
+
+  />
+
+</div>
+
       <section className="products">
 
         {
-             productosFiltrados.map((producto) => (
-            <
-              ProductCard
-              key={producto.id}
-              nombre={producto.nombre}
-              precio={producto.precio}
-              imagen={producto.imagen}
-              carrito={props.carrito}
-              setCarrito={props.setCarrito}
-            />
+  productosFiltrados.length > 0
+    ? productosFiltrados.map((producto) => (
 
-          ))
-        }
+      <ProductCard
+        key={producto.id}
+        nombre={producto.nombre}
+        precio={producto.precio}
+        imagen={producto.imagen}
+        carrito={props.carrito}
+        setCarrito={props.setCarrito}
+      />
+
+    ))
+    : (
+
+      <h2
+        style={{
+          width: '100%',
+          textAlign: 'center',
+          color: '#777'
+        }}
+      >
+
+        No se encontraron productos.
+
+      </h2>
+
+    )
+}
 
       </section>
 
