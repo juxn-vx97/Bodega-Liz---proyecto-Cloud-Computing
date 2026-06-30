@@ -2,10 +2,17 @@ import { useState, useEffect } from 'react'
 
 import db from '../firebase/firestore'
 
+import DashboardAdmin from '../components/DashboardAdmin'
+
+import PedidosAdmin from '../components/PedidosAdmin'
+
+import InventarioAdmin from '../components/InventarioAdmin'
+
 import {
   collection,
   addDoc
 } from 'firebase/firestore'
+
 
 function Admin() {
 
@@ -67,8 +74,8 @@ const [productos, setProductos] = useState(() => {
              }, [productos])
 
   const [adminLogueado, setAdminLogueado] = useState(
-  localStorage.getItem('adminLogueado') === 'true'
-  )
+  sessionStorage.getItem('adminLogueado') === 'true'
+)
 
   const [usuario, setUsuario] = useState('')
 
@@ -93,6 +100,8 @@ const [editarStock, setEditarStock] = useState('')
 const [editarEstado, setEditarEstado] = useState('')
 
 const [busqueda, setBusqueda] = useState('')
+
+const [moduloActivo, setModuloActivo] = useState('dashboard')
 
   const eliminarProducto = (index) => {
 
@@ -207,6 +216,12 @@ const productosStockBajo = productos.filter(
   producto => producto.stock > 0 && producto.stock <= 5
 ).length
 
+const pedidos = JSON.parse(
+
+  localStorage.getItem("pedidos")
+
+) || []
+
 const iniciarSesion = () => {
 
   if (
@@ -214,15 +229,15 @@ const iniciarSesion = () => {
     password === '123456'
   ) {
 
-    localStorage.setItem(
-      'adminLogueado',
-      'true'
-    )
+    sessionStorage.setItem(
+  'adminLogueado',
+  'true'
+)
 
-    localStorage.setItem(
-      'ultimoUsuario',
-      usuario
-    )
+sessionStorage.setItem(
+  'ultimoUsuario',
+  usuario
+)
 
     setAdminLogueado(true)
 
@@ -238,9 +253,13 @@ const iniciarSesion = () => {
 
 const cerrarSesion = () => {
 
-  localStorage.removeItem(
-    'adminLogueado'
-  )
+  sessionStorage.removeItem(
+  'adminLogueado'
+)
+
+sessionStorage.removeItem(
+  'ultimoUsuario'
+)
 
   setAdminLogueado(false)
 
@@ -311,11 +330,23 @@ if (!adminLogueado) {
 
         <ul>
 
-          <li>📊 Dashboard</li>
+        <li 
+            onClick={() => setModuloActivo('dashboard')}
+          >
+          📊 Dashboard
+        </li>
 
-          <li>📦 Productos</li>
+        <li
+            onClick={() => setModuloActivo('productos')}
+>
+          📦 Productos
+        </li>
 
-          <li>🛒 Pedidos</li>
+        <li
+            onClick={() => setModuloActivo('pedidos')}
+          >
+          🛒 Pedidos
+        </li>
 
           <li>👥 Clientes</li>
 
@@ -356,6 +387,9 @@ if (!adminLogueado) {
 
 </div>
 
+
+{moduloActivo === 'dashboard' && (
+
        <div className="admin-cards">
 
   <div className="admin-card">
@@ -394,8 +428,7 @@ if (!adminLogueado) {
 
             <h2>🛒 Pedidos</h2>
 
-            <h3>0</h3>
-
+            <h3>{pedidos.length}</h3>
           </div>
 
           <div className="admin-card">
@@ -415,6 +448,15 @@ if (!adminLogueado) {
           </div>
 
         </div>
+
+        )}
+
+
+        {moduloActivo === 'pedidos' && (
+
+  <PedidosAdmin />
+
+)}
 
         <h2 className="inventory-title">
 
