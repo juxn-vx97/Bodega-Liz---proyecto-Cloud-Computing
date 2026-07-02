@@ -10,7 +10,7 @@ import Contacto from './pages/Contacto'
 import Carrito from './pages/Carrito'
 import Admin from './pages/Admin'
 import FinalizarCompra from './pages/FinalizarCompra'
-
+import Recargas from "./pages/Recargas"
 
 function App() {
 
@@ -61,8 +61,10 @@ useEffect(() => {
           }
         />
 
-        <Route path="/servicios" element={<Servicios />} />
-
+<Route
+  path="/servicios"
+  element={<Recargas />}
+/>
         <Route path="/contacto" element={<Contacto />} />
         
 
@@ -88,12 +90,30 @@ useEffect(() => {
   <Route
   path="/finalizar-compra"
   element={
-    <FinalizarCompra
+  
+  <FinalizarCompra
       carrito={carrito}
       setCarrito={setCarrito}
     />
   }
+  
 />
+
+
+{/*
+
+<Route
+  path="/servicios-digitales"
+  element={<Recargas />}
+
+*/
+
+}
+
+  <Route
+  path="/servicios-digitales"
+  element={<Recargas />}
+  />
 
       </Routes>
 

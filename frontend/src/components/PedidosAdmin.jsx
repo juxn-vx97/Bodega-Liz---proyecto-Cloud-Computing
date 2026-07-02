@@ -31,6 +31,148 @@ function PedidosAdmin() {
 
   ) || []
 
+  const actualizarEstado = (id) => {
+
+  const pedidosActualizados = pedidos.map((pedido) => {
+
+    if (pedido.id !== id) return pedido
+
+    let nuevoEstado = pedido.estado
+
+    if (pedido.estado === "Pendiente") {
+
+      nuevoEstado = "Preparando"
+
+    }
+
+    else if (pedido.estado === "Preparando") {
+
+      nuevoEstado = "En camino"
+
+    }
+
+   else if (pedido.estado === "En camino") {
+
+  const confirmar = window.confirm(
+
+    "¿Desea marcar este pedido como ENTREGADO?\n\nEsta acción actualizará automáticamente el inventario."
+
+  )
+
+  if (!confirmar) {
+
+    return pedido
+
+  }
+
+  nuevoEstado = "Entregado"
+
+  descontarInventario(pedido)
+
+}
+
+    return {
+
+      ...pedido,
+
+      estado: nuevoEstado
+
+    }
+
+  })
+
+  localStorage.setItem(
+    "pedidos",
+    JSON.stringify(pedidosActualizados)
+  )
+
+  setPedidoSeleccionado(
+    pedidosActualizados.find(
+      pedido => pedido.id === id
+    )
+  )
+
+}
+
+const obtenerClaseEstado = (estado) => {
+
+  switch (estado) {
+
+    case "Pendiente":
+      return "estado-pendiente"
+
+    case "Preparando":
+      return "estado-preparando"
+
+    case "En camino":
+      return "estado-camino"
+
+    case "Entregado":
+      return "estado-entregado"
+
+    default:
+      return ""
+
+  }
+
+}
+
+const descontarInventario = (pedido) => {
+
+  const productos = JSON.parse(
+
+    localStorage.getItem("productos")
+
+  ) || []
+
+  const inventarioActualizado = productos.map((producto) => {
+
+    const productoPedido = pedido.productos.find(
+
+      p => p.nombre === producto.nombre
+
+    )
+
+    if (!productoPedido) {
+
+      return producto
+
+    }
+
+    const nuevoStock = Math.max(
+
+      0,
+
+      producto.stock - productoPedido.cantidad
+
+    )
+
+    return {
+
+      ...producto,
+
+      stock: nuevoStock,
+
+      estado: nuevoStock > 0
+
+        ? "Disponible"
+
+        : "Agotado"
+
+    }
+
+  })
+
+  localStorage.setItem(
+
+    "productos",
+
+    JSON.stringify(inventarioActualizado)
+
+  )
+
+}
+
   return (
 
     <div>
@@ -102,13 +244,13 @@ function PedidosAdmin() {
 
               <p>
 
-                Estado:
+              <strong>Estado:</strong>
 
-                <strong>
+              <span className={`estado-badge ${obtenerClaseEstado(pedido.estado)}`}>
 
-                  🟡 {pedido.estado}
+                {pedido.estado}
 
-                </strong>
+              </span>
 
               </p>
 
@@ -295,13 +437,43 @@ S/ {pedidoSeleccionado.total.toFixed(2)}
 
 <strong>Estado:</strong>
 
-<span className="estado-badge">
+<span
+  className={`estado-badge ${obtenerClaseEstado(pedidoSeleccionado.estado)}`}
+>
 
-🟡 {pedidoSeleccionado.estado}
+  {pedidoSeleccionado.estado}
 
 </span>
 
 </p>
+
+{
+pedidoSeleccionado.estado !== "Entregado" && (
+
+<button
+  className="estado-btn"
+  onClick={() =>
+    actualizarEstado(pedidoSeleccionado.id)
+  }
+>
+
+{
+pedidoSeleccionado.estado === "Pendiente"
+
+? "📦 Preparar Pedido"
+
+: pedidoSeleccionado.estado === "Preparando"
+
+? "🚚 Enviar Pedido"
+
+: "✅ Marcar como Entregado"
+
+}
+
+</button>
+
+)
+}
 
 </div>
 

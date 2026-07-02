@@ -52,13 +52,13 @@ function Navbar(props) {
           <Link to="/productos">Productos</Link>
         </li>
 
-        <li>
-          <Link to="/servicios">Servicios</Link>
-        </li>
+      <li>
+          <Link to="/servicios">⚡ Servicios</Link>
+      </li>
 
         <li>
           <Link to="/contacto">Contacto</Link>
-        </li>
+      </li>
 
       </ul>
 
