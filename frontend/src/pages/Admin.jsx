@@ -8,6 +8,17 @@ import PedidosAdmin from '../components/PedidosAdmin'
 
 import InventarioAdmin from '../components/InventarioAdmin'
 
+import ClientesAdmin from '../components/ClientesAdmin'
+
+import ConfiguracionAdmin from '../components/ConfiguracionAdmin'
+
+import {
+  obtenerProductos,
+  agregarProductoFirebase,
+  actualizarProductoFirebase,
+  eliminarProductoFirebase
+} from "../firebase/firebaseService"
+
 import {
   collection,
   addDoc
@@ -64,6 +75,50 @@ const [productos, setProductos] = useState(() => {
     ]
 })
 
+useEffect(() => {
+
+  const cargarProductosFirebase = async () => {
+
+    try {
+
+      const productosFirebase =
+        await obtenerProductos()
+
+      if (productosFirebase.length > 0) {
+
+        setProductos(productosFirebase)
+
+        localStorage.setItem(
+          "productos",
+          JSON.stringify(productosFirebase)
+        )
+
+        console.log(
+          "Productos cargados desde Firebase:",
+          productosFirebase.length
+        )
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Error al cargar productos desde Firebase:",
+        error
+      )
+
+      console.log(
+        "Se mantienen los productos guardados en localStorage."
+      )
+
+    }
+
+  }
+
+  cargarProductosFirebase()
+
+}, [])
+
         useEffect(() => {
 
             localStorage.setItem(
@@ -72,6 +127,7 @@ const [productos, setProductos] = useState(() => {
            )
 
              }, [productos])
+
 
   const [adminLogueado, setAdminLogueado] = useState(
   sessionStorage.getItem('adminLogueado') === 'true'
@@ -103,13 +159,61 @@ const [busqueda, setBusqueda] = useState('')
 
 const [moduloActivo, setModuloActivo] = useState('dashboard')
 
-  const eliminarProducto = (index) => {
+  const eliminarProducto = async (index) => {
 
-  const nuevosProductos = productos.filter(
-    (_, i) => i !== index
-  )
+  const productoAEliminar =
+    productos[index]
 
-  setProductos(nuevosProductos)
+  if (!productoAEliminar) {
+
+    alert(
+      "No se encontró el producto que desea eliminar."
+    )
+
+    return
+
+  }
+
+  const confirmar =
+    window.confirm(
+      `¿Está seguro de eliminar "${productoAEliminar.nombre}"?\n\nEsta acción eliminará el producto de Firebase.`
+    )
+
+  if (!confirmar) {
+
+    return
+
+  }
+
+  try {
+
+    await eliminarProductoFirebase(
+      productoAEliminar.id
+    )
+
+    setProductos(
+      productosActuales =>
+        productosActuales.filter(
+          (_, i) => i !== index
+        )
+    )
+
+    alert(
+      "Producto eliminado correctamente de Firebase."
+    )
+
+  } catch (error) {
+
+    console.error(
+      "Error al eliminar producto:",
+      error
+    )
+
+    alert(
+      "No se pudo eliminar el producto."
+    )
+
+  }
 
 }
 
@@ -127,10 +231,10 @@ const seleccionarProducto = (producto) => {
 
 }
 
-const agregarProducto = () => {
+const agregarProducto = async () => {
 
   if (
-    nuevoNombre === '' ||
+    nuevoNombre.trim() === '' ||
     nuevoPrecio === '' ||
     nuevoStock === ''
   ) {
@@ -143,54 +247,160 @@ const agregarProducto = () => {
 
   const productoNuevo = {
 
-  nombre: nuevoNombre,
+    nombre: nuevoNombre.trim(),
 
-  precio: Number(nuevoPrecio),
+    precio: Number(nuevoPrecio),
 
-  stock: Number(nuevoStock),
+    stock: Number(nuevoStock),
 
-  estado: Number(nuevoStock) > 0
-    ? 'Disponible'
-    : 'Agotado'
+    estado:
+      Number(nuevoStock) > 0
+        ? 'Disponible'
+        : 'Agotado'
+
+  }
+
+  try {
+
+    // 1. Guardar primero en Firebase
+    const idFirebase =
+      await agregarProductoFirebase(
+        productoNuevo
+      )
+
+    // 2. Agregar el ID generado por Firebase
+    const productoGuardado = {
+
+      id: idFirebase,
+
+      ...productoNuevo
+
+    }
+
+    // 3. Actualizar inmediatamente la pantalla
+    setProductos(
+      productosActuales => [
+
+        productoGuardado,
+
+        ...productosActuales
+
+      ]
+    )
+
+    // 4. Limpiar formulario
+    setNuevoNombre('')
+
+    setNuevoPrecio('')
+
+    setNuevoStock('')
+
+    setNuevoEstado('Disponible')
+
+    alert(
+      'Producto guardado correctamente en Firebase.'
+    )
+
+  } catch (error) {
+
+    console.error(
+      'Error al guardar producto en Firebase:',
+      error
+    )
+
+    alert(
+      'No se pudo guardar el producto. Revise la consola.'
+    )
+
+  }
 
 }
 
-  setProductos([
-    productoNuevo,
-    ...productos
-  ])
+const guardarCambios = async () => {
 
-  setNuevoNombre('')
+  const productoActual =
+    productos[productoEditando]
 
-  setNuevoPrecio('')
+  if (!productoActual) {
 
-  setNuevoStock('')
+    alert(
+      "No se encontró el producto que desea editar."
+    )
 
-  setNuevoEstado('Disponible')
+    return
 
-}
+  }
 
-const guardarCambios = () => {
+  if (
+    editarNombre.trim() === "" ||
+    editarPrecio === "" ||
+    editarStock === ""
+  ) {
 
-  const nuevosProductos = [...productos]
+    alert(
+      "Complete todos los campos."
+    )
 
-  nuevosProductos[productoEditando] = {
+    return
 
-  nombre: editarNombre,
+  }
 
-  precio: Number(editarPrecio),
+  const productoActualizado = {
 
-  stock: Number(editarStock),
+    nombre: editarNombre.trim(),
 
-  estado: Number(editarStock) > 0
-    ? 'Disponible'
-    : 'Agotado'
+    precio: Number(editarPrecio),
 
-}
+    stock: Number(editarStock),
 
-  setProductos(nuevosProductos)
+    estado:
+      Number(editarStock) > 0
+        ? "Disponible"
+        : "Agotado"
 
-  setProductoEditando(null)
+  }
+
+  try {
+
+    await actualizarProductoFirebase(
+      productoActual.id,
+      productoActualizado
+    )
+
+    setProductos(
+      productosActuales =>
+        productosActuales.map(
+          (producto, index) =>
+
+            index === productoEditando
+
+              ? {
+                  ...producto,
+                  ...productoActualizado
+                }
+
+              : producto
+        )
+    )
+
+    setProductoEditando(null)
+
+    alert(
+      "Producto actualizado correctamente en Firebase."
+    )
+
+  } catch (error) {
+
+    console.error(
+      "Error al actualizar producto:",
+      error
+    )
+
+    alert(
+      "No se pudo actualizar el producto."
+    )
+
+  }
 
 }
 
@@ -216,11 +426,78 @@ const productosStockBajo = productos.filter(
   producto => producto.stock > 0 && producto.stock <= 5
 ).length
 
-const pedidos = JSON.parse(
+const [pedidos, setPedidos] = useState(() => {
 
-  localStorage.getItem("pedidos")
+  return JSON.parse(
+    localStorage.getItem("pedidos")
+  ) || []
 
-) || []
+})
+
+const actualizarDatosAdmin = () => {
+
+  const pedidosActualizados =
+    JSON.parse(
+      localStorage.getItem("pedidos")
+    ) || []
+
+  const productosActualizados =
+    JSON.parse(
+      localStorage.getItem("productos")
+    ) || []
+
+  setPedidos(pedidosActualizados)
+
+  setProductos(productosActualizados)
+
+}
+
+useEffect(() => {
+
+  actualizarDatosAdmin()
+
+}, [moduloActivo])
+
+const ventasTotales = pedidos
+
+  .filter((pedido) => {
+
+    const esServicioDigital =
+      Boolean(pedido.tipoOperacion)
+
+    if (esServicioDigital) {
+
+      return pedido.estado === "Completado"
+
+    }
+
+    return pedido.estado === "Entregado"
+
+  })
+
+  .reduce((total, pedido) => {
+
+    return total + Number(pedido.total || 0)
+
+  }, 0)
+
+  const clientesUnicos = new Set(
+
+  pedidos
+
+    .filter((pedido) =>
+      !pedido.tipoOperacion
+    )
+
+    .map((pedido) =>
+      pedido.dni ||
+      pedido.telefono ||
+      pedido.cliente
+    )
+
+    .filter(Boolean)
+
+).size
 
 const iniciarSesion = () => {
 
@@ -348,9 +625,17 @@ if (!adminLogueado) {
           🛒 Pedidos
         </li>
 
-          <li>👥 Clientes</li>
+        <li
+            onClick={() => setModuloActivo('clientes')}
+         >
+          👥 Clientes
+        </li>
 
-          <li>⚙️ Configuración</li>
+<li
+  onClick={() => setModuloActivo('configuracion')}
+>
+  ⚙️ Configuración
+</li>
 
         </ul>
 
@@ -433,36 +718,44 @@ if (!adminLogueado) {
 
           <div className="admin-card">
 
-            <h2>💰 Ventas</h2>
+  <h2>💰 Ventas</h2>
 
-            <h3>S/ 0</h3>
+  <h3>
+    S/ {ventasTotales.toFixed(2)}
+  </h3>
 
-          </div>
-
+</div>
           <div className="admin-card">
 
-            <h2>👥 Clientes</h2>
+  <h2>👥 Clientes</h2>
 
-            <h3>0</h3>
+  <h3>{clientesUnicos}</h3>
 
-          </div>
+</div>
 
         </div>
 
         )}
 
 
-        {moduloActivo === 'pedidos' && (
+       {moduloActivo === 'pedidos' && (
 
-  <PedidosAdmin />
+  <PedidosAdmin
+    onDatosActualizados={actualizarDatosAdmin}
+  />
 
 )}
+
+{moduloActivo === 'productos' && (
+
+<>
 
         <h2 className="inventory-title">
 
           Gestión de Inventario
 
         </h2>
+
 
         <div className="search-container">
 
@@ -669,15 +962,30 @@ if (!adminLogueado) {
 
           </tbody>
 
-        </table>
+               </table>
+
+      </>
+
+    )}
+
+    {moduloActivo === 'clientes' && (
+
+      <ClientesAdmin />
+
+    )}
+
+    {moduloActivo === 'configuracion' && (
+
+      <ConfiguracionAdmin />
+
+    )}
 
       </main>
 
     </div>
 
-  );
-
+  )
 
 }
-export default Admin;
 
+export default Admin

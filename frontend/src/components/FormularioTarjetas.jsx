@@ -2,157 +2,295 @@ import { useState } from "react"
 
 function FormularioTarjetas() {
 
-    const [tarjeta, setTarjeta] = useState("")
+  const [tarjeta, setTarjeta] = useState("")
 
-    const [numero, setNumero] = useState("")
+  const [numero, setNumero] = useState("")
 
-    const [monto, setMonto] = useState("")
+  const [monto, setMonto] = useState("")
 
-    const continuar = () => {
 
-        if (tarjeta === "") {
+  const continuar = () => {
 
-            alert("Seleccione una tarjeta")
+    if (tarjeta === "") {
 
-            return
+      alert("Seleccione una tarjeta")
 
-        }
-
-        if (numero === "") {
-
-            alert("Ingrese el número de la tarjeta")
-
-            return
-
-        }
-
-        if (monto === "") {
-
-            alert("Seleccione un monto")
-
-            return
-
-        }
-
-        alert("Mañana conectaremos este formulario con Firebase 🚀")
+      return
 
     }
 
-    return (
+    if (numero.trim() === "") {
 
-        <div className="formulario-servicio">
+      alert("Ingrese el número de la tarjeta")
 
-            <h2>💳 Recarga de Tarjetas</h2>
+      return
 
-            <p className="formulario-descripcion">
+    }
 
-                Seleccione la tarjeta que desea recargar.
+    if (monto === "" || Number(monto) <= 0) {
 
-            </p>
+      alert("Seleccione o ingrese un monto válido")
 
-            <h3>Tipo de tarjeta</h3>
+      return
 
-            <div className="operadores-grid">
+    }
 
-                {
 
-                    [
+    const pedidos =
+      JSON.parse(
+        localStorage.getItem("pedidos")
+      ) || []
 
-                        "Metropolitano",
 
-                        "Línea 1",
+    const nuevaOperacion = {
 
-                        "Lima Pass",
+      id: Date.now(),
 
-                        "Gift Card"
+      tipoOperacion: "Recarga de Tarjeta",
 
-                    ].map((item)=>(
+      servicio: tarjeta,
 
-                        <button
+      detalle: `Número de tarjeta: ${numero}`,
 
-                            key={item}
+      total: Number(monto),
 
-                            className={`operador-btn ${tarjeta===item ? "activo" : ""}`}
+      fecha: new Date().toLocaleString(),
 
-                            onClick={()=>setTarjeta(item)}
+      estado: "Pendiente"
 
-                        >
+    }
 
-                            {item}
 
-                        </button>
+    localStorage.setItem(
 
-                    ))
+      "pedidos",
 
-                }
+      JSON.stringify([
+        ...pedidos,
+        nuevaOperacion
+      ])
 
-            </div>
+    )
 
-            <input
 
-                type="text"
+    alert(
+      `Recarga de ${tarjeta} por S/ ${Number(monto).toFixed(2)} registrada correctamente`
+    )
 
-                placeholder="Número de la tarjeta"
 
-                value={numero}
+    setTarjeta("")
 
-                onChange={(e)=>setNumero(e.target.value)}
+    setNumero("")
 
-            />
+    setMonto("")
 
-            <h3>Seleccione un monto</h3>
+  }
 
-            <div className="montos-grid">
 
-                {
+  return (
 
-                    [10,20,50,100].map((valor)=>(
+    <div className="formulario-servicio">
 
-                        <button
 
-                            key={valor}
+      <h2>
+        💳 Recarga de Tarjetas
+      </h2>
 
-                            className={`monto-btn ${monto===valor ? "activo" : ""}`}
 
-                            onClick={()=>setMonto(valor)}
+      <p className="formulario-descripcion">
 
-                        >
+        Selecciona el tipo de tarjeta, ingresa
+        su número y el monto que deseas recargar.
 
-                            S/ {valor}
+      </p>
 
-                        </button>
 
-                    ))
+      <h3>
+        Seleccione una tarjeta
+      </h3>
 
-                }
 
-            </div>
+      <div className="operadores-grid">
 
-            <input
-
-                type="number"
-
-                placeholder="Otro monto"
-
-                onChange={(e)=>setMonto(Number(e.target.value))}
-
-            />
+        {
+          [
+            "Metropolitano",
+            "Línea 1",
+            "Lima Pass",
+            "Gift Card"
+          ].map((item) => (
 
             <button
 
-                className="continuar-btn"
+              type="button"
 
-                onClick={continuar}
+              key={item}
+
+              className={
+                `operador-btn ${
+                  tarjeta === item
+                    ? "activo"
+                    : ""
+                }`
+              }
+
+              onClick={() =>
+                setTarjeta(item)
+              }
 
             >
 
-                Continuar
+              {item}
 
             </button>
 
-        </div>
+          ))
+        }
 
-    )
+      </div>
+
+
+      {
+        tarjeta && (
+
+          <p className="seleccion-actual">
+
+            Tarjeta seleccionada:{" "}
+
+            <strong>
+              {tarjeta}
+            </strong>
+
+          </p>
+
+        )
+      }
+
+
+      <input
+
+        type="text"
+
+        inputMode="numeric"
+
+        placeholder="Número de la tarjeta"
+
+        value={numero}
+
+        onChange={(e) => {
+
+          const soloNumeros =
+            e.target.value.replace(
+              /\D/g,
+              ""
+            )
+
+          setNumero(soloNumeros)
+
+        }}
+
+      />
+
+
+      <h3>
+        Seleccione un monto
+      </h3>
+
+
+      <div className="montos-grid">
+
+        {
+          [10, 20, 50, 100].map(
+            (valor) => (
+
+              <button
+
+                type="button"
+
+                key={valor}
+
+                className={
+                  `monto-btn ${
+                    Number(monto) === valor
+                      ? "activo"
+                      : ""
+                  }`
+                }
+
+                onClick={() =>
+                  setMonto(valor)
+                }
+
+              >
+
+                S/ {valor}
+
+              </button>
+
+            )
+          )
+        }
+
+      </div>
+
+
+      <input
+
+        type="number"
+
+        min="1"
+
+        placeholder="Monto de la recarga"
+
+        value={monto}
+
+        onChange={(e) =>
+          setMonto(e.target.value)
+        }
+
+      />
+
+
+      {
+        monto !== "" &&
+        Number(monto) > 0 && (
+
+          <p className="seleccion-actual">
+
+            Monto seleccionado:{" "}
+
+            <strong>
+
+              S/ {
+                Number(monto).toFixed(2)
+              }
+
+            </strong>
+
+          </p>
+
+        )
+      }
+
+
+      <button
+
+        type="button"
+
+        className="continuar-btn"
+
+        onClick={continuar}
+
+      >
+
+        Continuar
+
+      </button>
+
+
+    </div>
+
+  )
 
 }
 

@@ -1,24 +1,21 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app"
 
 const firebaseConfig = {
 
-  
-  apiKey: "AIzaSyDeGiFsXPsGQ3WizOYRm-i2LDTiaUSwYcU",
+  apiKey: "AIzaSyBu0VsQRd5F7pNgl4YBKneVc98IEXRY9hc",
 
-  authDomain: "bodega-liz.firebaseapp.com",
+  authDomain: "bodega-liz-89c53.firebaseapp.com",
 
-  projectId: "bodega-liz",
+  projectId: "bodega-liz-89c53",
 
-  storageBucket: "bodega-liz.firebasestorage.app",
+  storageBucket: "bodega-liz-89c53.firebasestorage.app",
 
-  messagingSenderId: "34759995952",
+  messagingSenderId: "211381813869",
 
-  appId: "1:34759995952:web:6bceec6172dcb34605b3f5",
+  appId: "1:211381813869:web:1e715e9e41d7dad0043564"
 
-  measurementId: "G-2FMQ1C6CE4"
-  
-};
+}
 
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig)
 
-export default app;
+export default app

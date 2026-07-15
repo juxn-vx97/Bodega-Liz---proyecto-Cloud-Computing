@@ -1,488 +1,1003 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
+
 function PedidosAdmin() {
 
-  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null)
+  const [pedidoSeleccionado, setPedidoSeleccionado] =
+    useState(null)
+
+  const [pedidos, setPedidos] = useState(() => {
+
+    return JSON.parse(
+      localStorage.getItem("pedidos")
+    ) || []
+
+  })
 
   useEffect(() => {
 
-  const cerrarConEsc = (e) => {
+    const cerrarConEsc = (e) => {
 
-    if (e.key === "Escape") {
+      if (e.key === "Escape") {
 
-      setPedidoSeleccionado(null)
+        setPedidoSeleccionado(null)
+
+      }
 
     }
 
+    window.addEventListener(
+      "keydown",
+      cerrarConEsc
+    )
+
+    return () => {
+
+      window.removeEventListener(
+        "keydown",
+        cerrarConEsc
+      )
+
+    }
+
+  }, [])
+
+
+  const esServicioDigital = (pedido) => {
+
+    return Boolean(pedido.tipoOperacion)
+
   }
 
-  window.addEventListener("keydown", cerrarConEsc)
-
-  return () => {
-
-    window.removeEventListener("keydown", cerrarConEsc)
-
-  }
-
-}, [])
-
-  const pedidos = JSON.parse(
-
-    localStorage.getItem("pedidos")
-
-  ) || []
 
   const actualizarEstado = (id) => {
 
-  const pedidosActualizados = pedidos.map((pedido) => {
+    const pedidosActualizados =
+      pedidos.map((pedido) => {
 
-    if (pedido.id !== id) return pedido
+        if (pedido.id !== id) {
 
-    let nuevoEstado = pedido.estado
+          return pedido
 
-    if (pedido.estado === "Pendiente") {
+        }
 
-      nuevoEstado = "Preparando"
 
-    }
+        // =========================
+        // SERVICIOS DIGITALES
+        // =========================
 
-    else if (pedido.estado === "Preparando") {
+        if (esServicioDigital(pedido)) {
 
-      nuevoEstado = "En camino"
+          let nuevoEstado = pedido.estado
 
-    }
+          if (pedido.estado === "Pendiente") {
 
-   else if (pedido.estado === "En camino") {
+            nuevoEstado = "Procesando"
 
-  const confirmar = window.confirm(
+          }
 
-    "¿Desea marcar este pedido como ENTREGADO?\n\nEsta acción actualizará automáticamente el inventario."
+          else if (
+            pedido.estado === "Procesando"
+          ) {
 
-  )
+            const confirmar =
+              window.confirm(
 
-  if (!confirmar) {
+                "¿Desea marcar esta operación como COMPLETADA?"
 
-    return pedido
+              )
+
+            if (!confirmar) {
+
+              return pedido
+
+            }
+
+            nuevoEstado = "Completado"
+
+          }
+
+          return {
+
+            ...pedido,
+
+            estado: nuevoEstado
+
+          }
+
+        }
+
+
+        // =========================
+        // PEDIDOS DE PRODUCTOS
+        // =========================
+
+        let nuevoEstado = pedido.estado
+
+        if (pedido.estado === "Pendiente") {
+
+          nuevoEstado = "Preparando"
+
+        }
+
+        else if (
+          pedido.estado === "Preparando"
+        ) {
+
+          nuevoEstado = "En camino"
+
+        }
+
+        else if (
+          pedido.estado === "En camino"
+        ) {
+
+          const confirmar =
+            window.confirm(
+
+              "¿Desea marcar este pedido como ENTREGADO?\n\nEsta acción actualizará automáticamente el inventario."
+
+            )
+
+          if (!confirmar) {
+
+            return pedido
+
+          }
+
+          nuevoEstado = "Entregado"
+
+          descontarInventario(pedido)
+
+        }
+
+        return {
+
+          ...pedido,
+
+          estado: nuevoEstado
+
+        }
+
+      })
+
+
+    localStorage.setItem(
+
+      "pedidos",
+
+      JSON.stringify(pedidosActualizados)
+
+    )
+
+
+    setPedidos(pedidosActualizados)
+
+    if (onDatosActualizados) {
+
+  onDatosActualizados()
+
+}
+
+
+    setPedidoSeleccionado(
+
+      pedidosActualizados.find(
+
+        (pedido) =>
+          pedido.id === id
+
+      ) || null
+
+    )
 
   }
 
-  nuevoEstado = "Entregado"
 
-  descontarInventario(pedido)
+  const obtenerClaseEstado = (estado) => {
 
-}
+    switch (estado) {
 
-    return {
+      case "Pendiente":
 
-      ...pedido,
+        return "estado-pendiente"
 
-      estado: nuevoEstado
+
+      case "Preparando":
+
+      case "Procesando":
+
+        return "estado-preparando"
+
+
+      case "En camino":
+
+        return "estado-camino"
+
+
+      case "Entregado":
+
+      case "Completado":
+
+        return "estado-entregado"
+
+
+      default:
+
+        return ""
 
     }
-
-  })
-
-  localStorage.setItem(
-    "pedidos",
-    JSON.stringify(pedidosActualizados)
-  )
-
-  setPedidoSeleccionado(
-    pedidosActualizados.find(
-      pedido => pedido.id === id
-    )
-  )
-
-}
-
-const obtenerClaseEstado = (estado) => {
-
-  switch (estado) {
-
-    case "Pendiente":
-      return "estado-pendiente"
-
-    case "Preparando":
-      return "estado-preparando"
-
-    case "En camino":
-      return "estado-camino"
-
-    case "Entregado":
-      return "estado-entregado"
-
-    default:
-      return ""
 
   }
 
-}
 
-const descontarInventario = (pedido) => {
+  const descontarInventario = (pedido) => {
 
-  const productos = JSON.parse(
+    // Seguridad:
+    // los servicios digitales no tienen productos
 
-    localStorage.getItem("productos")
+    if (
+      !Array.isArray(pedido.productos)
+    ) {
 
-  ) || []
-
-  const inventarioActualizado = productos.map((producto) => {
-
-    const productoPedido = pedido.productos.find(
-
-      p => p.nombre === producto.nombre
-
-    )
-
-    if (!productoPedido) {
-
-      return producto
+      return
 
     }
 
-    const nuevoStock = Math.max(
 
-      0,
+    const productos =
 
-      producto.stock - productoPedido.cantidad
+      JSON.parse(
+
+        localStorage.getItem("productos")
+
+      ) || []
+
+
+    const inventarioActualizado =
+
+      productos.map((producto) => {
+
+        const productoPedido =
+
+          pedido.productos.find(
+
+            (p) =>
+              p.nombre === producto.nombre
+
+          )
+
+
+        if (!productoPedido) {
+
+          return producto
+
+        }
+
+
+        const nuevoStock = Math.max(
+
+          0,
+
+          producto.stock -
+            productoPedido.cantidad
+
+        )
+
+
+        return {
+
+          ...producto,
+
+          stock: nuevoStock,
+
+          estado:
+            nuevoStock > 0
+
+              ? "Disponible"
+
+              : "Agotado"
+
+        }
+
+      })
+
+
+    localStorage.setItem(
+
+      "productos",
+
+      JSON.stringify(
+        inventarioActualizado
+      )
 
     )
 
-    return {
+  }
 
-      ...producto,
-
-      stock: nuevoStock,
-
-      estado: nuevoStock > 0
-
-        ? "Disponible"
-
-        : "Agotado"
-
-    }
-
-  })
-
-  localStorage.setItem(
-
-    "productos",
-
-    JSON.stringify(inventarioActualizado)
-
-  )
-
-}
 
   return (
 
     <div>
 
-      <h2>🛒 Gestión de Pedidos</h2>
+      <h2>
+        🛒 Gestión de Pedidos y Operaciones
+      </h2>
+
 
       {
         pedidos.length === 0 ? (
 
-          <p>No existen pedidos registrados.</p>
+          <p>
+            No existen pedidos u operaciones registradas.
+          </p>
 
         ) : (
 
-            pedidos.map((pedido, index) => (
-            <div
-              key={pedido.id}
-              className="pedido-card"
-            >
+          pedidos.map(
+            (pedido, index) => {
 
-             <div className="pedido-header">
+              const servicioDigital =
+                esServicioDigital(pedido)
 
-  <div>
+              return (
 
-    <h3>
+                <div
+                  key={pedido.id}
+                  className="pedido-card"
+                >
 
-      📦 Pedido #{String(index + 1).padStart(3, '0')}
+                  <div className="pedido-header">
 
-    </h3>
+                    <div>
 
-    <p className="pedido-id">
+                      <h3>
 
-      ID: {pedido.id}
+                        {
+                          servicioDigital
 
-    </p>
+                            ? `⚡ ${pedido.tipoOperacion}`
 
-  </div>
+                            : `📦 Pedido #${String(
+                                index + 1
+                              ).padStart(
+                                3,
+                                "0"
+                              )}`
+                        }
 
-</div>
+                      </h3>
 
-              <p>
 
-                👤 <strong>{pedido.cliente}</strong>
+                      <p className="pedido-id">
 
-              </p>
+                        ID: {pedido.id}
 
-              <p>
+                      </p>
 
-                📅 {pedido.fecha}
+                    </div>
 
-              </p>
+                  </div>
 
-              <p>
 
-                🚚 {pedido.tipoEntrega}
+                  {
+                    servicioDigital ? (
 
-              </p>
+                      <>
 
-              <p>
+                        <p>
 
-                💳 {pedido.metodoPago}
+                          🔹 <strong>
+                            Servicio:
+                          </strong>{" "}
 
-              </p>
+                          {pedido.servicio}
 
-              <p>
+                        </p>
 
-                💰 S/ {pedido.total.toFixed(2)}
 
-              </p>
+                        <p>
 
-              <p>
+                          📝 {pedido.detalle}
 
-              <strong>Estado:</strong>
+                        </p>
 
-              <span className={`estado-badge ${obtenerClaseEstado(pedido.estado)}`}>
+                      </>
 
-                {pedido.estado}
+                    ) : (
 
-              </span>
+                      <>
 
-              </p>
+                        <p>
 
-              <button
-                className="detalle-btn"
-                onClick={() => setPedidoSeleccionado(pedido)}
-            >
+                          👤 <strong>
 
-                👁 Ver detalle
+                            {
+                              pedido.cliente ||
+                              "Cliente no registrado"
+                            }
 
-              </button>
+                          </strong>
+
+                        </p>
+
+
+                        <p>
+
+                          🚚 {
+                            pedido.tipoEntrega ||
+                            "No especificado"
+                          }
+
+                        </p>
+
+
+                        <p>
+
+                          💳 {
+                            pedido.metodoPago ||
+                            "No especificado"
+                          }
+
+                        </p>
+
+                      </>
+
+                    )
+                  }
+
+
+                  <p>
+
+                    📅 {
+                      pedido.fecha ||
+                      "Sin fecha"
+                    }
+
+                  </p>
+
+
+                  <p>
+
+                    💰 S/ {
+                      Number(
+                        pedido.total || 0
+                      ).toFixed(2)
+                    }
+
+                  </p>
+
+
+                  <p>
+
+                    <strong>
+                      Estado:
+                    </strong>{" "}
+
+                    <span
+                      className={
+                        `estado-badge ${
+                          obtenerClaseEstado(
+                            pedido.estado
+                          )
+                        }`
+                      }
+                    >
+
+                      {pedido.estado}
+
+                    </span>
+
+                  </p>
+
+
+                  <button
+
+                    className="detalle-btn"
+
+                    onClick={() =>
+                      setPedidoSeleccionado(
+                        pedido
+                      )
+                    }
+
+                  >
+
+                    👁 Ver detalle
+
+                  </button>
+
+                </div>
+
+              )
+
+            }
+          )
+
+        )
+      }
+
+
+      {
+        pedidoSeleccionado && (
+
+          <div className="modal-overlay">
+
+            <div className="pedido-modal">
+
+              <div className="modal-header">
+
+                <h2>
+
+                  {
+                    esServicioDigital(
+                      pedidoSeleccionado
+                    )
+
+                      ? `⚡ ${pedidoSeleccionado.tipoOperacion}`
+
+                      : "🛒 Detalle del Pedido"
+                  }
+
+                </h2>
+
+
+                <button
+
+                  className="close-modal"
+
+                  onClick={() =>
+                    setPedidoSeleccionado(
+                      null
+                    )
+                  }
+
+                >
+
+                  ✕
+
+                </button>
+
+              </div>
+
+
+              <div className="detalle-pedido">
+
+
+                {
+                  esServicioDigital(
+                    pedidoSeleccionado
+                  ) ? (
+
+                    // =========================
+                    // DETALLE SERVICIO DIGITAL
+                    // =========================
+
+                    <>
+
+                      <p>
+
+                        <strong>
+                          ⚡ Tipo de operación:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .tipoOperacion
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          🔹 Servicio:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .servicio
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          📝 Detalle:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .detalle
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          💰 Monto:
+                        </strong>{" "}
+
+                        S/ {
+                          Number(
+                            pedidoSeleccionado
+                              .total || 0
+                          ).toFixed(2)
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          📅 Fecha:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .fecha
+                        }
+
+                      </p>
+
+                    </>
+
+                  ) : (
+
+                    // =========================
+                    // DETALLE PEDIDO NORMAL
+                    // =========================
+
+                    <>
+
+                      <p>
+
+                        <strong>
+                          👤 Cliente:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .cliente
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          🆔 DNI:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .dni
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          📱 Celular:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .telefono
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          📍 Dirección:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .direccion
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          📌 Referencia:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .referencia
+                        }
+
+                      </p>
+
+
+                      <hr />
+
+
+                      <h3>
+                        🛒 Productos
+                      </h3>
+
+
+                      <table className="productos-table">
+
+                        <thead>
+
+                          <tr>
+
+                            <th>
+                              Producto
+                            </th>
+
+                            <th>
+                              Cantidad
+                            </th>
+
+                          </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                          {
+                            (
+                              pedidoSeleccionado
+                                .productos || []
+                            ).map(
+
+                              (
+                                producto,
+                                index
+                              ) => (
+
+                                <tr
+                                  key={index}
+                                >
+
+                                  <td>
+
+                                    {
+                                      producto.nombre
+                                    }
+
+                                  </td>
+
+                                  <td>
+
+                                    {
+                                      producto.cantidad
+                                    }
+
+                                  </td>
+
+                                </tr>
+
+                              )
+
+                            )
+                          }
+
+                        </tbody>
+
+                      </table>
+
+
+                      <hr />
+
+
+                      <p>
+
+                        <strong>
+                          Subtotal:
+                        </strong>{" "}
+
+                        S/ {
+                          Number(
+                            pedidoSeleccionado
+                              .subtotal || 0
+                          ).toFixed(2)
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          IGV:
+                        </strong>{" "}
+
+                        S/ {
+                          Number(
+                            pedidoSeleccionado
+                              .igv || 0
+                          ).toFixed(2)
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          Delivery:
+                        </strong>{" "}
+
+                        S/ {
+                          Number(
+                            pedidoSeleccionado
+                              .delivery || 0
+                          ).toFixed(2)
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          Total:
+                        </strong>{" "}
+
+                        S/ {
+                          Number(
+                            pedidoSeleccionado
+                              .total || 0
+                          ).toFixed(2)
+                        }
+
+                      </p>
+
+
+                      <hr />
+
+
+                      <p>
+
+                        <strong>
+                          💳 Método de pago:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .metodoPago
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          🚚 Entrega:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .tipoEntrega
+                        }
+
+                      </p>
+
+
+                      <p>
+
+                        <strong>
+                          📅 Fecha:
+                        </strong>{" "}
+
+                        {
+                          pedidoSeleccionado
+                            .fecha
+                        }
+
+                      </p>
+
+                    </>
+
+                  )
+                }
+
+
+                <p>
+
+                  <strong>
+                    Estado:
+                  </strong>{" "}
+
+                  <span
+                    className={
+                      `estado-badge ${
+                        obtenerClaseEstado(
+                          pedidoSeleccionado
+                            .estado
+                        )
+                      }`
+                    }
+                  >
+
+                    {
+                      pedidoSeleccionado
+                        .estado
+                    }
+
+                  </span>
+
+                </p>
+
+
+                {
+                  pedidoSeleccionado.estado !==
+                    "Entregado" &&
+
+                  pedidoSeleccionado.estado !==
+                    "Completado" && (
+
+                    <button
+
+                      className="estado-btn"
+
+                      onClick={() =>
+                        actualizarEstado(
+                          pedidoSeleccionado.id
+                        )
+                      }
+
+                    >
+
+                      {
+                        esServicioDigital(
+                          pedidoSeleccionado
+                        )
+
+                          ? pedidoSeleccionado.estado ===
+                            "Pendiente"
+
+                            ? "⚙️ Procesar Operación"
+
+                            : "✅ Marcar como Completada"
+
+                          : pedidoSeleccionado.estado ===
+                            "Pendiente"
+
+                            ? "📦 Preparar Pedido"
+
+                            : pedidoSeleccionado.estado ===
+                              "Preparando"
+
+                              ? "🚚 Enviar Pedido"
+
+                              : "✅ Marcar como Entregado"
+                      }
+
+                    </button>
+
+                  )
+                }
+
+              </div>
 
             </div>
 
-          ))
+          </div>
 
         )
-
       }
-
-      {
-pedidoSeleccionado && (
-
-<div className="modal-overlay">
-
-<div className="pedido-modal">
-
-<div className="modal-header">
-
-  <h2>🛒 Detalle del Pedido</h2>
-
-  <button
-    className="close-modal"
-    onClick={() => setPedidoSeleccionado(null)}
-  >
-    ✕
-  </button>
-
-</div>
-
-<div className="detalle-pedido">
-
-<p>
-
-<strong>👤 Cliente:</strong>
-
-{pedidoSeleccionado.cliente}
-
-</p>
-
-<p>
-
-<strong>🆔 DNI:</strong>
-
-{pedidoSeleccionado.dni}
-
-</p>
-
-<p>
-
-<strong>📱 Celular:</strong>
-
-{pedidoSeleccionado.telefono}
-
-</p>
-
-<p>
-
-<strong>📍 Dirección:</strong>
-
-{pedidoSeleccionado.direccion}
-
-</p>
-
-<p>
-
-<strong>📌 Referencia:</strong>
-
-{pedidoSeleccionado.referencia}
-
-</p>
-
-<hr />
-
-<h3>🛒 Productos</h3>
-
-<table className="productos-table">
-
-  <thead>
-
-    <tr>
-
-      <th>Producto</th>
-
-      <th>Cantidad</th>
-
-    </tr>
-
-  </thead>
-
-  <tbody>
-
-    {
-
-      pedidoSeleccionado.productos.map((producto,index)=>(
-
-        <tr key={index}>
-
-          <td>{producto.nombre}</td>
-
-          <td>{producto.cantidad}</td>
-
-        </tr>
-
-      ))
-
-    }
-
-  </tbody>
-
-</table>
-
-<hr />
-
-<p>
-
-<strong>Subtotal:</strong>
-
-S/ {pedidoSeleccionado.subtotal.toFixed(2)}
-
-</p>
-
-<p>
-
-<strong>IGV:</strong>
-
-S/ {pedidoSeleccionado.igv.toFixed(2)}
-
-</p>
-
-<p>
-
-<strong>Delivery:</strong>
-
-S/ {pedidoSeleccionado.delivery.toFixed(2)}
-
-</p>
-
-<p>
-
-<strong>Total:</strong>
-
-S/ {pedidoSeleccionado.total.toFixed(2)}
-
-</p>
-
-<hr />
-
-<p>
-
-<strong>💳 Método de pago:</strong>
-
-{pedidoSeleccionado.metodoPago}
-
-</p>
-
-<p>
-
-<strong>🚚 Entrega:</strong>
-
-{pedidoSeleccionado.tipoEntrega}
-
-</p>
-
-<p>
-
-<strong>📅 Fecha:</strong>
-
-{pedidoSeleccionado.fecha}
-
-</p>
-
-<p>
-
-<strong>Estado:</strong>
-
-<span
-  className={`estado-badge ${obtenerClaseEstado(pedidoSeleccionado.estado)}`}
->
-
-  {pedidoSeleccionado.estado}
-
-</span>
-
-</p>
-
-{
-pedidoSeleccionado.estado !== "Entregado" && (
-
-<button
-  className="estado-btn"
-  onClick={() =>
-    actualizarEstado(pedidoSeleccionado.id)
-  }
->
-
-{
-pedidoSeleccionado.estado === "Pendiente"
-
-? "📦 Preparar Pedido"
-
-: pedidoSeleccionado.estado === "Preparando"
-
-? "🚚 Enviar Pedido"
-
-: "✅ Marcar como Entregado"
-
-}
-
-</button>
-
-)
-}
-
-</div>
-
-</div>
-
-</div>
-
-)
-}
 
     </div>
 

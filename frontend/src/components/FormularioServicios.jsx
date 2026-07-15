@@ -2,147 +2,286 @@ import { useState } from "react"
 
 function FormularioServicios() {
 
-    const [servicio, setServicio] = useState("")
+  const [servicio, setServicio] = useState("")
 
-    const [codigo, setCodigo] = useState("")
+  const [codigo, setCodigo] = useState("")
 
-    const [monto, setMonto] = useState("")
+  const [monto, setMonto] = useState("")
 
-    const continuar = () => {
 
-        if(servicio===""){
+  const continuar = () => {
 
-            alert("Seleccione un servicio")
+    if (servicio === "") {
 
-            return
+      alert("Seleccione un servicio")
 
-        }
-
-        if(codigo===""){
-
-            alert("Ingrese el código del suministro")
-
-            return
-
-        }
-
-        if(monto===""){
-
-            alert("Seleccione un monto")
-
-            return
-
-        }
-
-        alert("Mañana conectaremos este formulario con Firebase 🚀")
+      return
 
     }
 
-    return(
+    if (codigo.trim() === "") {
 
-        <div className="formulario-servicio">
+      alert("Ingrese el código del suministro")
 
-            <h2>💡 Pago de Servicios</h2>
+      return
 
-            <p className="formulario-descripcion">
+    }
 
-                Seleccione el servicio que desea pagar.
+    if (monto === "" || Number(monto) <= 0) {
 
-            </p>
+      alert("Seleccione o ingrese un monto válido")
 
-            <h3>Servicio</h3>
+      return
 
-            <div className="operadores-grid">
+    }
 
-                {
 
-                    ["Luz","Agua","Internet","Cable","Gas"].map((item)=>(
+    const pedidos =
+      JSON.parse(
+        localStorage.getItem("pedidos")
+      ) || []
 
-                        <button
 
-                            key={item}
+    const nuevaOperacion = {
 
-                            className={`operador-btn ${servicio===item ? "activo" : ""}`}
+      id: Date.now(),
 
-                            onClick={()=>setServicio(item)}
+      tipoOperacion: "Pago de Servicios",
 
-                        >
+      servicio: servicio,
 
-                            {item}
+      detalle: `Código de suministro: ${codigo}`,
 
-                        </button>
+      total: Number(monto),
 
-                    ))
+      fecha: new Date().toLocaleString(),
 
-                }
+      estado: "Pendiente"
 
-            </div>
+    }
 
-            <input
 
-                type="text"
+    localStorage.setItem(
 
-                placeholder="Código del suministro"
+      "pedidos",
 
-                value={codigo}
+      JSON.stringify([
+        ...pedidos,
+        nuevaOperacion
+      ])
 
-                onChange={(e)=>setCodigo(e.target.value)}
+    )
 
-            />
 
-            <h3>Seleccione un monto</h3>
+    alert(
+      `Pago de ${servicio} por S/ ${Number(monto).toFixed(2)} registrado correctamente`
+    )
 
-            <div className="montos-grid">
 
-                {
+    setServicio("")
 
-                    [20,50,100].map((valor)=>(
+    setCodigo("")
 
-                        <button
+    setMonto("")
 
-                            key={valor}
+  }
 
-                            className={`monto-btn ${monto===valor ? "activo" : ""}`}
 
-                            onClick={()=>setMonto(valor)}
+  return (
 
-                        >
+    <div className="formulario-servicio">
 
-                            S/ {valor}
 
-                        </button>
+      <h2>
+        💡 Pago de Servicios
+      </h2>
 
-                    ))
 
-                }
+      <p className="formulario-descripcion">
 
-            </div>
+        Selecciona el servicio, ingresa el código
+        de suministro y el monto que deseas pagar.
 
-            <input
+      </p>
 
-                type="number"
 
-                placeholder="Otro monto"
+      <h3>
+        Seleccione un servicio
+      </h3>
 
-                onChange={(e)=>setMonto(Number(e.target.value))}
 
-            />
+      <div className="operadores-grid">
+
+        {
+          [
+            "Luz",
+            "Agua",
+            "Internet",
+            "Cable",
+            "Gas"
+          ].map((item) => (
 
             <button
 
-                className="continuar-btn"
+              type="button"
 
-                onClick={continuar}
+              key={item}
+
+              className={
+                `operador-btn ${
+                  servicio === item
+                    ? "activo"
+                    : ""
+                }`
+              }
+
+              onClick={() =>
+                setServicio(item)
+              }
 
             >
 
-                Continuar
+              {item}
 
             </button>
 
-        </div>
+          ))
+        }
 
-    )
+      </div>
+
+
+      {
+        servicio && (
+
+          <p className="seleccion-actual">
+
+            Servicio seleccionado:{" "}
+
+            <strong>
+              {servicio}
+            </strong>
+
+          </p>
+
+        )
+      }
+
+
+      <input
+
+        type="text"
+
+        placeholder="Código del suministro"
+
+        value={codigo}
+
+        onChange={(e) =>
+          setCodigo(e.target.value)
+        }
+
+      />
+
+
+      <h3>
+        Seleccione un monto
+      </h3>
+
+
+      <div className="montos-grid">
+
+        {
+          [20, 50, 100].map(
+            (valor) => (
+
+              <button
+
+                type="button"
+
+                key={valor}
+
+                className={
+                  `monto-btn ${
+                    Number(monto) === valor
+                      ? "activo"
+                      : ""
+                  }`
+                }
+
+                onClick={() =>
+                  setMonto(valor)
+                }
+
+              >
+
+                S/ {valor}
+
+              </button>
+
+            )
+          )
+        }
+
+      </div>
+
+
+      <input
+
+        type="number"
+
+        min="1"
+
+        placeholder="Monto del pago"
+
+        value={monto}
+
+        onChange={(e) =>
+          setMonto(e.target.value)
+        }
+
+      />
+
+
+      {
+        monto !== "" &&
+        Number(monto) > 0 && (
+
+          <p className="seleccion-actual">
+
+            Monto seleccionado:{" "}
+
+            <strong>
+
+              S/ {
+                Number(monto).toFixed(2)
+              }
+
+            </strong>
+
+          </p>
+
+        )
+      }
+
+
+      <button
+
+        type="button"
+
+        className="continuar-btn"
+
+        onClick={continuar}
+
+      >
+
+        Continuar
+
+      </button>
+
+
+    </div>
+
+  )
 
 }
 
