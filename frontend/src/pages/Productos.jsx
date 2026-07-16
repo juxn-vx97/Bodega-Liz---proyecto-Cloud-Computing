@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { obtenerProductos } from "../firebase/firebaseService"
 
 import ProductCard from '../components/ProductCard'
 import cocaColaImg from '../assets/cocacola.jpg'
 import laysImg from '../assets/lays.jpg'
 import oreoImg from '../assets/oreo.jpg'
-
 import aguaImg from '../assets/aguacielo.webp'
 import arrozImg from '../assets/arrozcosteno.webp'
 import azucarImg from '../assets/azucarrubia.webp'
@@ -22,6 +22,47 @@ import sublimeImg from '../assets/sublime.png'
 import tentacionImg from '../assets/tentacion.webp'
 import tridentImg from '../assets/trident.webp'
 
+const imagenesProductos = {
+
+  "Coca Cola": cocaColaImg,
+
+  "Papas Lays": laysImg,
+
+  "Galletas Oreo": oreoImg,
+
+  "Agua Cielo": aguaImg,
+
+  "Arroz Costeño": arrozImg,
+
+  "Azúcar Rubia": azucarImg,
+
+  "Casino": casinoImg,
+
+  "Chizitos": chizitosImg,
+
+  "Doritos": doritosImg,
+
+  "Leche Gloria": gloriaImg,
+
+  "Pringles": pringlesImg,
+
+  "Red Bull": redbullImg,
+
+  "Ritz": ritzImg,
+
+  "Snickers": snickersImg,
+
+  "Sprite": spriteImg,
+
+  "Sublime": sublimeImg,
+
+  "Tentación": tentacionImg,
+
+  "Trident": tridentImg
+
+}
+
+
 function Productos(props) {
 
   const location = useLocation()
@@ -30,6 +71,36 @@ const categoriaSeleccionada =
   location.state?.categoria
 
 const [busqueda, setBusqueda] = useState('')
+
+const [productosFirebase, setProductosFirebase] = useState([])
+
+useEffect(() => {
+
+  const cargarProductos = async () => {
+
+    try {
+
+      const datos =
+        await obtenerProductos()
+
+      setProductosFirebase(datos)
+
+      console.log(
+        "Productos cargados:",
+        datos.length
+      )
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
+  }
+
+  cargarProductos()
+
+}, [])
 
   const productos = [
 
@@ -180,22 +251,87 @@ const [busqueda, setBusqueda] = useState('')
 
   ]
 
+  const categorias = {
 
-  const productosFiltrados = productos.filter((producto) => {
+  "Coca Cola": "Bebidas",
 
-  const coincideCategoria =
-    categoriaSeleccionada
-      ? producto.categoria === categoriaSeleccionada
-      : true
+  "Agua Cielo": "Bebidas",
 
-  const coincideBusqueda =
-    producto.nombre
-      .toLowerCase()
-      .includes(busqueda.toLowerCase())
+  "Red Bull": "Bebidas",
 
-  return coincideCategoria && coincideBusqueda
+  "Sprite": "Bebidas",
 
-})
+  "Papas Lays": "Snacks",
+
+  "Chizitos": "Snacks",
+
+  "Doritos": "Snacks",
+
+  "Pringles": "Snacks",
+
+  "Galletas Oreo": "Galletas",
+
+  "Casino": "Galletas",
+
+  "Ritz": "Galletas",
+
+  "Tentación": "Galletas",
+
+  "Arroz Costeño": "Primera necesidad",
+
+  "Azúcar Rubia": "Primera necesidad",
+
+  "Leche Gloria": "Primera necesidad",
+
+  "Snickers": "Dulces",
+
+  "Sublime": "Dulces",
+
+  "Trident": "Dulces"
+
+}
+
+const productosFiltrados = productosFirebase
+
+  .map((producto) => ({
+
+    ...producto,
+
+    imagen:
+
+      imagenesProductos[producto.nombre],
+
+    categoria:
+
+      categorias[producto.nombre] || ""
+
+  }))
+
+  .filter((producto) => {
+
+    const coincideCategoria =
+
+      categoriaSeleccionada
+
+        ? producto.categoria === categoriaSeleccionada
+
+        : true
+
+    const coincideBusqueda =
+
+      producto.nombre
+
+        .toLowerCase()
+
+        .includes(
+
+          busqueda.toLowerCase()
+
+        )
+
+    return coincideCategoria && coincideBusqueda
+
+  })
 
   return (
 
@@ -246,13 +382,14 @@ const [busqueda, setBusqueda] = useState('')
     ? productosFiltrados.map((producto) => (
 
       <ProductCard
-        key={producto.id}
-        nombre={producto.nombre}
-        precio={producto.precio}
-        imagen={producto.imagen}
-        carrito={props.carrito}
-        setCarrito={props.setCarrito}
-      />
+  key={producto.id}
+  nombre={producto.nombre}
+  precio={producto.precio}
+  imagen={producto.imagen}
+  stock={producto.stock}
+  carrito={props.carrito}
+  setCarrito={props.setCarrito}
+/>
 
     ))
     : (

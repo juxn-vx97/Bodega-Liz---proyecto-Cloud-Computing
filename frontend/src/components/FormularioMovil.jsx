@@ -1,5 +1,9 @@
 import { useState } from "react"
 
+import {
+  agregarOperacionFirebase
+} from "../firebase/firebaseService"
+
 function FormularioMovil() {
 
   const [operador, setOperador] = useState("")
@@ -9,8 +13,8 @@ function FormularioMovil() {
   const [monto, setMonto] = useState("")
 
 
-  const continuar = () => {
-
+  const continuar = async () => {
+    
     if (operador === "") {
 
       alert("Seleccione un operador")
@@ -36,42 +40,41 @@ function FormularioMovil() {
     }
 
 
-    const pedidos =
-      JSON.parse(
-        localStorage.getItem("pedidos")
-      ) || []
+ const nuevaOperacion = {
 
+  id: Date.now(),
 
-    const nuevaOperacion = {
+  tipoOperacion: "Recarga Móvil",
 
-      id: Date.now(),
+  servicio: operador,
 
-      tipoOperacion: "Recarga Móvil",
+  detalle: `Número: ${numero}`,
 
-      servicio: operador,
+  total: Number(monto),
 
-      detalle: `Número: ${numero}`,
+  fecha: new Date().toLocaleString(),
 
-      total: Number(monto),
+  estado: "Pendiente"
 
-      fecha: new Date().toLocaleString(),
+}
 
-      estado: "Pendiente"
+try {
 
-    }
+  await agregarOperacionFirebase(
 
+    nuevaOperacion
 
-    localStorage.setItem(
+  )
 
-      "pedidos",
+} catch (error) {
 
-      JSON.stringify([
-        ...pedidos,
-        nuevaOperacion
-      ])
+  console.error(error)
 
-    )
+  alert("Error al registrar la operación.")
 
+  return
+
+}
 
     alert(
       `Recarga de S/ ${Number(monto).toFixed(2)} para ${numero} registrada correctamente`
@@ -297,3 +300,4 @@ function FormularioMovil() {
 }
 
 export default FormularioMovil
+

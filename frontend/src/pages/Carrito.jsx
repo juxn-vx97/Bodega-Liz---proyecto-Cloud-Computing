@@ -14,11 +14,21 @@ function Carrito(props) {
 
 
 
-  const aumentarCantidad = (indexProducto) => {
+const aumentarCantidad = (indexProducto) => {
 
-    const nuevoCarrito = props.carrito.map((producto, index) => {
+  const nuevoCarrito = props.carrito.map(
+
+    (producto, index) => {
 
       if (index === indexProducto) {
+
+        if (producto.cantidad >= producto.stock) {
+
+          alert("No hay más stock disponible.")
+
+          return producto
+
+        }
 
         return {
 
@@ -32,11 +42,13 @@ function Carrito(props) {
 
       return producto
 
-    })
+    }
 
-    props.setCarrito(nuevoCarrito)
+  )
 
-  }
+  props.setCarrito(nuevoCarrito)
+
+}
 
 
 

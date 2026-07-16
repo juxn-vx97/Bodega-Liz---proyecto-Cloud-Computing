@@ -2,6 +2,14 @@ function ProductCard(props) {
 
   function agregarCarrito() {
 
+    if (props.stock === 0) {
+
+  alert("Este producto está agotado.")
+
+  return
+
+}
+
     const productoExistente = props.carrito.find(
 
       (producto) => producto.nombre === props.nombre
@@ -10,6 +18,14 @@ function ProductCard(props) {
 
 
     if (productoExistente) {
+
+      if (productoExistente.cantidad >= props.stock) {
+
+  alert("No hay suficiente stock disponible.")
+
+  return
+
+}
 
       const nuevoCarrito = props.carrito.map((producto) => {
 
@@ -37,17 +53,17 @@ function ProductCard(props) {
 
         ...props.carrito,
 
-        {
+       {
+  nombre: props.nombre,
 
-          nombre: props.nombre,
+  precio: props.precio,
 
-          precio: props.precio,
+  imagen: props.imagen,
 
-          imagen: props.imagen,
+  cantidad: 1,
 
-          cantidad: 1
-
-        }
+  stock: props.stock
+}
 
       ])
 

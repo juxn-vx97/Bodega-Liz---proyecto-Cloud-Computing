@@ -1,17 +1,77 @@
 import { useState, useEffect } from "react"
 
+import {
+
+  obtenerPedidos,
+
+  obtenerOperaciones,
+
+  actualizarPedidoFirebase,
+
+  descontarStockFirebase
+
+} from "../firebase/firebaseService"
+
 function PedidosAdmin() {
 
   const [pedidoSeleccionado, setPedidoSeleccionado] =
     useState(null)
 
-  const [pedidos, setPedidos] = useState(() => {
+ const [pedidos, setPedidos] = useState([])
 
-    return JSON.parse(
-      localStorage.getItem("pedidos")
-    ) || []
+ const [operaciones, setOperaciones] = useState([])
 
-  })
+  useEffect(() => {
+
+const cargarPedidos = async () => {
+
+  try {
+
+    const datosPedidos =
+
+      await obtenerPedidos()
+
+    const datosOperaciones =
+
+      await obtenerOperaciones()
+
+    setPedidos(datosPedidos)
+
+    setOperaciones(datosOperaciones)
+
+    console.log(
+
+      "Pedidos:",
+
+      datosPedidos.length
+
+    )
+
+    console.log(
+
+      "Operaciones:",
+
+      datosOperaciones.length
+
+    )
+
+  } catch (error) {
+
+    console.error(
+
+      "Error cargando datos:",
+
+      error
+
+    )
+
+  }
+
+}
+
+  cargarPedidos()
+
+}, [])
 
   useEffect(() => {
 
@@ -49,7 +109,7 @@ function PedidosAdmin() {
   }
 
 
-  const actualizarEstado = (id) => {
+  const actualizarEstado = async (id) => {
 
     const pedidosActualizados =
       pedidos.map((pedido) => {
@@ -161,34 +221,75 @@ function PedidosAdmin() {
       })
 
 
-    localStorage.setItem(
+   const pedidoActualizado = pedidosActualizados.find(
 
-      "pedidos",
+  (pedido) => pedido.id === id
 
-      JSON.stringify(pedidosActualizados)
+)
+
+try {
+
+  await actualizarPedidoFirebase(
+
+    pedidoActualizado.firebaseId,
+
+    {
+
+      estado: pedidoActualizado.estado
+
+    }
+
+  )
+
+  if (
+
+    pedidoActualizado.estado === "Entregado" &&
+
+    !esServicioDigital(pedidoActualizado)
+
+  ) {
+
+    await descontarStockFirebase(
+
+      pedidoActualizado.productos
 
     )
 
+  }
 
-    setPedidos(pedidosActualizados)
+  const nuevosPedidos =
 
-    if (onDatosActualizados) {
+    await obtenerPedidos()
 
-  onDatosActualizados()
+  setPedidos(nuevosPedidos)
+
+  setPedidoSeleccionado(
+
+    nuevosPedidos.find(
+
+      (pedido) => pedido.id === id
+
+    ) || null
+
+  )
+
+  if (onDatosActualizados) {
+
+    onDatosActualizados()
+
+  }
+
+} catch (error) {
+
+  console.error(
+
+    "Error al actualizar el pedido:",
+
+    error
+
+  )
 
 }
-
-
-    setPedidoSeleccionado(
-
-      pedidosActualizados.find(
-
-        (pedido) =>
-          pedido.id === id
-
-      ) || null
-
-    )
 
   }
 
@@ -323,6 +424,9 @@ function PedidosAdmin() {
         🛒 Gestión de Pedidos y Operaciones
       </h2>
 
+      <h3>
+        📦 Pedidos de Productos
+      </h3>
 
       {
         pedidos.length === 0 ? (
@@ -516,6 +620,11 @@ function PedidosAdmin() {
         )
       }
 
+  <hr style={{ margin: "40px 0" }} />
+
+<h3>
+  ⚡ Operaciones Digitales
+</h3>
 
       {
         pedidoSeleccionado && (

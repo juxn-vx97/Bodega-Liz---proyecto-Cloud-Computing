@@ -156,6 +156,9 @@ export const agregarPedidoFirebase =
 // ==========================================
 
 export const actualizarPedidoFirebase =
+
+
+
   async (firebaseId, datos) => {
 
     if (!firebaseId) {
@@ -178,3 +181,104 @@ export const actualizarPedidoFirebase =
     )
 
   }
+
+  // ==========================================
+// DESCONTAR STOCK EN FIRESTORE
+// ==========================================
+
+export const descontarStockFirebase = async (productosPedido) => {
+
+  const productosFirebase = await obtenerProductos()
+
+  for (const productoPedido of productosPedido) {
+
+    const productoFirebase = productosFirebase.find(
+
+      (producto) =>
+
+        producto.nombre === productoPedido.nombre
+
+    )
+
+    if (!productoFirebase) {
+
+      continue
+
+    }
+
+    const nuevoStock = Math.max(
+
+      0,
+
+      productoFirebase.stock - productoPedido.cantidad
+
+    )
+
+    await actualizarProductoFirebase(
+
+      productoFirebase.id,
+
+      {
+
+        stock: nuevoStock,
+
+        estado:
+
+          nuevoStock > 0
+
+            ? "Disponible"
+
+            : "Agotado"
+
+      }
+
+    )
+
+  }
+
+}
+
+// ==========================================
+// AGREGAR OPERACIÓN
+// ==========================================
+
+export const agregarOperacionFirebase =
+  async (operacion) => {
+
+    const referencia = await addDoc(
+
+      collection(db, "operaciones"),
+
+      operacion
+
+    )
+
+    return referencia.id
+
+  }
+
+  // ==========================================
+// OBTENER OPERACIONES
+// ==========================================
+
+export const obtenerOperaciones = async () => {
+
+  const consulta = await getDocs(
+
+    collection(db, "operaciones")
+
+  )
+
+  return consulta.docs.map(
+
+    (documento) => ({
+
+      firebaseId: documento.id,
+
+      ...documento.data()
+
+    })
+
+  )
+
+}

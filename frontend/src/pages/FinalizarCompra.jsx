@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { agregarPedidoFirebase } from "../firebase/firebaseService"
 
 function FinalizarCompra(props) {
 
@@ -27,7 +28,7 @@ const total = props.carrito.reduce((acumulador, producto) => {
 
 }, 0)
 
-const confirmarPedido = () => {
+const confirmarPedido = async () => {
 
   if (
     nombre === '' ||
@@ -93,6 +94,21 @@ localStorage.setItem(
   JSON.stringify(pedidosGuardados)
 
 )
+
+try {
+
+  await agregarPedidoFirebase(pedido)
+
+  console.log("Pedido guardado en Firestore.")
+
+} catch (error) {
+
+  console.error(
+    "Error al guardar el pedido:",
+    error
+  )
+
+}
 
   setTotalPedido(
 

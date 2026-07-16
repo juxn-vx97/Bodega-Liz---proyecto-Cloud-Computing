@@ -13,10 +13,13 @@ import ClientesAdmin from '../components/ClientesAdmin'
 import ConfiguracionAdmin from '../components/ConfiguracionAdmin'
 
 import {
+
   obtenerProductos,
+  obtenerPedidos,
   agregarProductoFirebase,
   actualizarProductoFirebase,
   eliminarProductoFirebase
+
 } from "../firebase/firebaseService"
 
 import {
@@ -426,29 +429,27 @@ const productosStockBajo = productos.filter(
   producto => producto.stock > 0 && producto.stock <= 5
 ).length
 
-const [pedidos, setPedidos] = useState(() => {
+const [pedidos, setPedidos] = useState([])
 
-  return JSON.parse(
-    localStorage.getItem("pedidos")
-  ) || []
+const actualizarDatosAdmin = async () => {
 
-})
+  try {
 
-const actualizarDatosAdmin = () => {
+    const pedidosFirebase =
+      await obtenerPedidos()
 
-  const pedidosActualizados =
-    JSON.parse(
-      localStorage.getItem("pedidos")
-    ) || []
+    const productosFirebase =
+      await obtenerProductos()
 
-  const productosActualizados =
-    JSON.parse(
-      localStorage.getItem("productos")
-    ) || []
+    setPedidos(pedidosFirebase)
 
-  setPedidos(pedidosActualizados)
+    setProductos(productosFirebase)
 
-  setProductos(productosActualizados)
+  } catch (error) {
+
+    console.error(error)
+
+  }
 
 }
 
