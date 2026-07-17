@@ -21,6 +21,8 @@ function PedidosAdmin() {
 
  const [operaciones, setOperaciones] = useState([])
 
+  const [vista, setVista] = useState("pedidos")
+
   useEffect(() => {
 
 const cargarPedidos = async () => {
@@ -415,6 +417,7 @@ try {
 
   }
 
+  console.log("VERSION NUEVA DE PedidosAdmin");
 
   return (
 
@@ -424,11 +427,45 @@ try {
         🛒 Gestión de Pedidos y Operaciones
       </h2>
 
-      <h3>
-        📦 Pedidos de Productos
-      </h3>
+<div
+  style={{
+    display: "flex",
+    gap: "15px",
+    margin: "20px 0",
+    padding: "10px",
+    background: "#e8f5e9",
+    border: "2px solid green"
+  }}
+>
+
+  <button
+    className={
+      vista === "pedidos"
+        ? "tab-activa"
+        : "tab"
+    }
+    onClick={() => setVista("pedidos")}
+  >
+    📦 Pedidos
+  </button>
+
+  <button
+    className={
+      vista === "operaciones"
+        ? "tab-activa"
+        : "tab"
+    }
+    onClick={() => setVista("operaciones")}
+  >
+    ⚡ Operaciones
+  </button>
+
+</div>
+
 
       {
+        vista === "pedidos" && (
+        
         pedidos.length === 0 ? (
 
           <p>
@@ -618,13 +655,119 @@ try {
           )
 
         )
-      }
+      )
+    }  
 
-  <hr style={{ margin: "40px 0" }} />
 
-<h3>
-  ⚡ Operaciones Digitales
-</h3>
+{
+  vista === "operaciones" && (
+
+    operaciones.length === 0 ? (
+
+      <h3
+        style={{
+          textAlign: "center",
+          color: "#777",
+          marginTop: "30px"
+        }}
+      >
+        No existen operaciones registradas.
+      </h3>
+
+    ) : (
+
+      operaciones.map((operacion) => (
+
+        <div
+          key={operacion.firebaseId}
+          className="pedido-card"
+        >
+
+          <div className="pedido-header">
+
+            <h3>
+
+              ⚡ {operacion.tipoOperacion}
+
+            </h3>
+
+            <p className="pedido-id">
+
+              ID: {operacion.id}
+
+            </p>
+
+          </div>
+
+          <p>
+
+            <strong>Servicio:</strong>{" "}
+
+            {operacion.servicio}
+
+          </p>
+
+          <p>
+
+            {operacion.detalle}
+
+          </p>
+
+          <p>
+
+            📅 {operacion.fecha}
+
+          </p>
+
+          <p>
+
+            💰 S/ {Number(
+              operacion.total
+            ).toFixed(2)}
+
+          </p>
+
+          <p>
+
+            <strong>Estado:</strong>{" "}
+
+            <span
+              className={`estado-badge ${obtenerClaseEstado(
+                operacion.estado
+              )}`}
+            >
+
+              {operacion.estado}
+
+            </span>
+
+          </p>
+
+          <button
+
+            className="detalle-btn"
+
+            onClick={() =>
+              setPedidoSeleccionado(
+                operacion
+              )
+            }
+
+          >
+
+            👁 Ver detalle
+
+          </button>
+
+        </div>
+
+      ))
+
+    )
+
+  )
+
+}
 
       {
         pedidoSeleccionado && (

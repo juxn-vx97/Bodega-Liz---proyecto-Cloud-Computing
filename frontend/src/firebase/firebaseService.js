@@ -157,8 +157,6 @@ export const agregarPedidoFirebase =
 
 export const actualizarPedidoFirebase =
 
-
-
   async (firebaseId, datos) => {
 
     if (!firebaseId) {
@@ -172,6 +170,34 @@ export const actualizarPedidoFirebase =
     const referencia = doc(
       db,
       "pedidos",
+      firebaseId
+    )
+
+    await updateDoc(
+      referencia,
+      datos
+    )
+
+  }
+
+  // ==========================================
+// ACTUALIZAR OPERACIÓN
+// ==========================================
+
+export const actualizarOperacionFirebase =
+  async (firebaseId, datos) => {
+
+    if (!firebaseId) {
+
+      throw new Error(
+        "No se recibió el ID de Firebase de la operación."
+      )
+
+    }
+
+    const referencia = doc(
+      db,
+      "operaciones",
       firebaseId
     )
 
@@ -264,21 +290,16 @@ export const agregarOperacionFirebase =
 export const obtenerOperaciones = async () => {
 
   const consulta = await getDocs(
-
     collection(db, "operaciones")
+  );
 
-  )
+  const datos = consulta.docs.map((documento) => ({
+    firebaseId: documento.id,
+    ...documento.data()
+  }));
 
-  return consulta.docs.map(
+  console.log("TOTAL OPERACIONES:", datos.length);
+  console.log(datos);
 
-    (documento) => ({
-
-      firebaseId: documento.id,
-
-      ...documento.data()
-
-    })
-
-  )
-
-}
+  return datos;
+};
