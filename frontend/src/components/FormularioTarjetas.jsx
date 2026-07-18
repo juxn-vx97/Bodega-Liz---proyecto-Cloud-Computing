@@ -1,5 +1,9 @@
 import { useState } from "react"
 
+import {
+  agregarOperacionFirebase
+} from "../firebase/firebaseService"
+
 function FormularioTarjetas() {
 
   const [tarjeta, setTarjeta] = useState("")
@@ -9,7 +13,7 @@ function FormularioTarjetas() {
   const [monto, setMonto] = useState("")
 
 
-  const continuar = () => {
+  const continuar = async () => {
 
     if (tarjeta === "") {
 
@@ -36,41 +40,44 @@ function FormularioTarjetas() {
     }
 
 
-    const pedidos =
-      JSON.parse(
-        localStorage.getItem("pedidos")
-      ) || []
-
-
     const nuevaOperacion = {
 
-      id: Date.now(),
+  id: Date.now(),
 
-      tipoOperacion: "Recarga de Tarjeta",
+  tipoOperacion: "Recarga de Tarjeta",
 
-      servicio: tarjeta,
+  servicio: tarjeta,
 
-      detalle: `Número de tarjeta: ${numero}`,
+  numero: numero,
 
-      total: Number(monto),
+  total: Number(monto),
 
-      fecha: new Date().toLocaleString(),
+  fecha: new Date().toLocaleString(),
 
-      estado: "Pendiente"
+  estado: "Pendiente"
 
-    }
+}
+
+try {
 
 
-    localStorage.setItem(
+console.log("OPERACIÓN A GUARDAR:", nuevaOperacion);
 
-      "pedidos",
+  await agregarOperacionFirebase(
+    nuevaOperacion
+  )
 
-      JSON.stringify([
-        ...pedidos,
-        nuevaOperacion
-      ])
+console.log("SE GUARDÓ CORRECTAMENTE");
 
-    )
+} catch (error) {
+
+  console.error(error)
+
+  alert("Error al registrar la operación.")
+
+  return
+
+}
 
 
     alert(

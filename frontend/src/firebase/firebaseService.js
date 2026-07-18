@@ -9,6 +9,8 @@ import {
 
 import db from "./firestore"
 
+console.log("DB:", db);
+
 
 // ==========================================
 // PRODUCTOS

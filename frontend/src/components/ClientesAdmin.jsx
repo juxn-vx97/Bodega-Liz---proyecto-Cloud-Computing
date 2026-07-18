@@ -7,6 +7,8 @@ function ClientesAdmin() {
 
   pedidos.forEach((pedido) => {
 
+  if (!pedido.cliente) return;
+
     const identificador =
       pedido.dni ||
       pedido.telefono ||

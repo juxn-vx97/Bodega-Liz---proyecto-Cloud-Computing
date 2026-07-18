@@ -48,7 +48,7 @@ function FormularioMovil() {
 
   servicio: operador,
 
-  detalle: `Número: ${numero}`,
+  numero: numero,
 
   total: Number(monto),
 
