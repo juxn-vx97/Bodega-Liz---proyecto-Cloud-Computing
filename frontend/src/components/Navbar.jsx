@@ -2,11 +2,14 @@ import { Link, useLocation } from 'react-router-dom'
 
 function Navbar(props) {
 
+   console.log("Navbar render:", props.carrito);
+
   const location = useLocation()
   
   if (location.pathname === '/administrador') {
 
   return null
+
 
 }
 
