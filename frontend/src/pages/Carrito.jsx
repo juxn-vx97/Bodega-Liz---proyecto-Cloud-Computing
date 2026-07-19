@@ -92,7 +92,7 @@ const aumentarCantidad = (indexProducto) => {
 
   const subtotal = total - igv
 
-
+ console.log("Carrito actual:", props.carrito);
 
   return (
     <div>
