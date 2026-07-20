@@ -971,7 +971,7 @@ if (!adminLogueado) {
 
     {moduloActivo === 'clientes' && (
 
-      <ClientesAdmin />
+      <ClientesAdmin pedidos={pedidos} />
 
     )}
 

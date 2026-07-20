@@ -1,7 +1,4 @@
-function ClientesAdmin() {
-
-  const pedidos =
-    JSON.parse(localStorage.getItem("pedidos")) || []
+function ClientesAdmin({ pedidos }) {
 
   const clientes = []
 
