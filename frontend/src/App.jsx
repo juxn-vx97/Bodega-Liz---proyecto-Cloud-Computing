@@ -14,6 +14,8 @@ function App() {
 
 const [carrito, setCarrito] = useState([]);
 
+console.log("APP:", carrito);
+
   return (
 
     <div>
