@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 function Carrito(props) {
+
+  const navigate = useNavigate();
 
   const eliminarProducto = (indexProducto) => {
 
@@ -182,19 +186,11 @@ const aumentarCantidad = (indexProducto) => {
           Total: S/ {total.toFixed(2)}
         </h2>
 
-        <button
-
-        className="checkout-btn"
-
-        onClick={() =>
-        window.location.href =
-        '/finalizar-compra'
-        }
-
+       <button
+  className="checkout-btn"
+  onClick={() => navigate("/finalizar-compra")}
 >
-
-Finalizar Compra
-
+  Finalizar Compra
 </button>
 
       </section>
