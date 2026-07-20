@@ -69,7 +69,7 @@ function Navbar(props) {
 
       <Link to="/carrito" className="cart">
 
-        🛒 PRUEBA {props.carrito.length}
+        🛒  {props.carrito.length}
       </Link>
 
     </nav>
